@@ -30,6 +30,21 @@ final class WebSessionRecovery {
 
     boolean compatible(StoredWebSession.Record record) throws Exception;
 
+    /**
+     * 记录确定已过期（同一应用，但安装包换代使 app 身份或运行时身份不再匹配）。
+     *
+     * <p>与 {@link #compatible} 的区别是语义而非严格程度：{@code compatible} 回答「这条记录还能不能用」，
+     * 本方法回答「它不能用的原因是确定的过期，而不是证据未知」。只有安装包自身发生了可识别的换代
+     * （同包名、versionName / lastUpdateTime 变化，或随包运行时身份变化）时才返回 true；
+     * 任何无法解释的不匹配都必须返回 false，保留 {@code UNKNOWN} 的保守语义 —— 不启动、不停止、不擦除现场。
+     *
+     * <p>为什么需要它：{@code compatible} 把「升级换代」和「证据未知」压成同一个 false，
+     * 于是升级后旧实例永远停在 UNKNOWN，进不了安装与修复页，表现为升级后无法启动。
+     */
+    default boolean superseded(StoredWebSession.Record record) throws Exception {
+      return false;
+    }
+
     /** 仅为旧调用及测试兼容；生产实现必须覆盖 observe，false 不能作为退出证明。 */
     default boolean verify(StoredWebSession.Record record) throws Exception {
       return false;
@@ -91,7 +106,12 @@ final class WebSessionRecovery {
         reason = "INCOMPATIBLE";
         boolean compatible = ports.compatible(saved);
         if (!ports.current()) return outcome(ports, Result.STALE, "STALE", attempts, stage);
-        if (!compatible) return outcome(ports, Result.UNKNOWN, reason, attempts, stage);
+        // 同包名换代（升级 / 降级 APK）是确定性事件，旧实例必然失效；
+        // 其余不兼容一律保守判 UNKNOWN，不启动、不停止、不擦除现场。
+        if (!compatible)
+          return ports.superseded(saved)
+              ? outcome(ports, Result.STALE, "SUPERSEDED", attempts, stage)
+              : outcome(ports, Result.UNKNOWN, reason, attempts, stage);
         notifyProgress(ports, "AUTHENTICATING", attempt);
         if (!ports.current()) return outcome(ports, Result.STALE, "STALE", attempts, stage);
         if (Thread.currentThread().isInterrupted())

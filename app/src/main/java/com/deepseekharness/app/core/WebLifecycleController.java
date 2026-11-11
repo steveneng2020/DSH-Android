@@ -214,6 +214,30 @@ final class WebLifecycleController {
                           && !MaintenanceCoordinator.pending(owner);
                     }
 
+                    /**
+                     * 同包名的安装包换代（升级或降级）使记录的 app 身份 / 运行时身份不再匹配时，判为确定性过期。
+                     *
+                     * <p>只放行「能用换代解释」的不匹配：rootfs 位置变了、用户显式停止、有未完成维护、
+                     * 或运行时描述符读不出来，一律返回 false 保留 UNKNOWN 的保守语义。这样升级后旧实例
+                     * 能落到 STALE（进而进入安装与修复页做受管增量更新），而真正可疑的不匹配仍然挂起不处理。
+                     */
+                    public boolean superseded(
+                        com.deepseekharness.app.runtime.StoredWebSession.Record r)
+                        throws Exception {
+                      if (!r.app().startsWith(ctx.getPackageName() + ":")) return false;
+                      if (hasStopSentinel()) return false;
+                      if (MaintenanceCoordinator.pending(owner)) return false;
+                      if (!r.root().equals(proot.getRootfsDir().getCanonicalPath())) return false;
+                      String expected;
+                      try {
+                        expected = proot.expectedRuntimeDescriptor().id();
+                      } catch (Exception unreadable) {
+                        return false;
+                      }
+                      return !r.app().equals(storedSession.appIdentity())
+                          || !r.descriptor().equals(expected);
+                    }
+
                     public WebProcessManager.SessionObservation observe(
                         com.deepseekharness.app.runtime.StoredWebSession.Record r)
                         throws Exception {
