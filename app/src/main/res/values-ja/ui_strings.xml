@@ -29,6 +29,7 @@
     <string name="dns_auto" formatted="false">"自動互換モード（推奨）"</string>
     <string name="dns_ipv4" formatted="false">"IPv4 DNS 互換モード"</string>
     <string name="dns_native" formatted="false">"ネイティブのデュアルスタック名前解決"</string>
+    <string name="icon_style_cancel" formatted="false">"キャンセル"</string>
     <string name="nh_sub" formatted="false">"ネットワーク異常は記録のみで修復しません"</string>
     <string name="nh_title" formatted="false">"ネットワーク診断"</string>
     <string name="paste_text" formatted="false">"貼り付け"</string>

@@ -3,10 +3,27 @@ package com.deepseekharness.app.util;
 import java.net.URI;
 import java.util.Locale;
 
-/** Current official metadata, release-page and artifact origins; APK identity is verified separately. */
+/**
+ * 更新清单、发布页与 APK 产物的来源白名单；APK 身份另行校验。
+ *
+ * <p><b>本 fork 的改动</b>：上游用自有站点 {@code dsha.cc} 作为更新通道，
+ * 但该站点不索引本 fork 的包，且实测 TLS 握手直接断开
+ * （{@code SSL routines::unexpected eof}），App 内更新对它永远失败。
+ * 本 fork 改用自己仓库的静态 JSON，推送新版本即可自更新。
+ *
+ * <p>上游 v0.2.2 的 {@code dsha.cc} 分支保留为兼容读取（旧清单若仍被引用不崩溃），
+ * 但 {@link #FEED} 与 {@link #DEFAULT_PAGE} 指向本仓库，实际不再走它。
+ */
 public final class UpdateLocations {
-  public static final String FEED = "https://dsha.cc/api/updates.json";
-  public static final String DEFAULT_PAGE = "https://dsha.cc/download/";
+  /** 本 fork 的更新清单：仓库 main 分支根目录的 updates.json。 */
+  public static final String FEED =
+      "https://raw.githubusercontent.com/"
+          + com.deepseekharness.app.BuildConfig.FORK_REPOSITORY_SLUG
+          + "/main/updates.json";
+
+  /** 本 fork 的发布页。 */
+  public static final String DEFAULT_PAGE =
+      "https://github.com/" + com.deepseekharness.app.BuildConfig.FORK_REPOSITORY_SLUG + "/releases";
 
   private UpdateLocations() {}
 
@@ -40,34 +57,58 @@ public final class UpdateLocations {
     return uri != null && name.equalsIgnoreCase(uri.getHost());
   }
 
+  /** 本 fork 仓库的 slug（小写，用于路径比对）。 */
+  private static String forkSlug() {
+    return com.deepseekharness.app.BuildConfig.FORK_REPOSITORY_SLUG.toLowerCase(Locale.ROOT);
+  }
+
   public static boolean feed(String value) {
     URI uri = parse(value);
-    return host(uri, "dsha.cc")
-        && "/api/updates.json".equals(uri.getPath())
-        && uri.getRawQuery() == null;
+    if (uri == null || uri.getRawQuery() != null) return false;
+    String path = uri.getPath();
+    // 本 fork 的通道：raw.githubusercontent.com/<slug>/main/updates.json
+    if (host(uri, "raw.githubusercontent.com"))
+      return ("/" + com.deepseekharness.app.BuildConfig.FORK_REPOSITORY_SLUG + "/main/updates.json")
+          .equals(path);
+    // 上游旧通道：保留只读兼容，不作为默认来源。
+    return host(uri, "dsha.cc") && "/api/updates.json".equals(path);
   }
 
   public static boolean page(String value) {
     URI uri = parse(value);
     if (uri == null || uri.getRawQuery() != null) return false;
     String path = uri.getPath();
+    // 本 fork 的发布页：github.com/<slug>/releases[/latest|/tag/<tag>]
+    String lower = path.toLowerCase(Locale.ROOT);
+    String forkPrefix = "/" + forkSlug() + "/releases";
+    if (host(uri, "github.com")
+        && (lower.equals(forkPrefix)
+            || lower.equals(forkPrefix + "/")
+            || lower.equals(forkPrefix + "/latest")
+            || lower.startsWith(forkPrefix + "/tag/") && lower.length() > forkPrefix.length() + 5))
+      return true;
+    // 上游站点与上游仓库页面：只读兼容。
     if (host(uri, "dsha.cc"))
       return path.equals("/") || path.equals("/download") || path.equals("/download/");
-    String lower = path.toLowerCase(Locale.ROOT), prefix = "/dsh-app/dsha/releases";
+    String upPrefix = "/dsh-app/dsha/releases";
     return host(uri, "github.com")
-        && (lower.equals(prefix)
-            || lower.equals(prefix + "/")
-            || lower.equals(prefix + "/latest")
-            || lower.startsWith(prefix + "/tag/") && lower.length() > prefix.length() + 5);
+        && (lower.equals(upPrefix)
+            || lower.equals(upPrefix + "/")
+            || lower.equals(upPrefix + "/latest")
+            || lower.startsWith(upPrefix + "/tag/") && lower.length() > upPrefix.length() + 5);
   }
 
   public static boolean artifact(String value) {
     URI uri = parse(value);
     if (uri == null) return false;
     String path = uri.getPath().toLowerCase(Locale.ROOT);
-    return path.endsWith(".apk")
-        && (host(uri, "dsha.cc") && path.startsWith("/downloads/")
-            || host(uri, "github.com") && path.startsWith("/dsh-app/dsha/releases/download/"));
+    if (!path.endsWith(".apk")) return false;
+    // 本 fork 的 Release 资产。
+    if (host(uri, "github.com")
+        && path.startsWith("/" + forkSlug() + "/releases/download/")) return true;
+    // 上游资产与旧站点下载路径：只读兼容。
+    return host(uri, "dsha.cc") && path.startsWith("/downloads/")
+        || host(uri, "github.com") && path.startsWith("/dsh-app/dsha/releases/download/");
   }
 
   public static String releasePage(String value) {

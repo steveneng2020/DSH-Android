@@ -10,7 +10,12 @@ import androidx.appcompat.app.AlertDialog;
 /** 关于对话框：GitHub 仓库 / QQ 交流群入口（欢迎页 + 设置页 + 顶栏共用）。 */
 public final class AboutDialog {
 
-  public static final String GITHUB_URL = com.deepseekharness.app.util.Constants.REPOSITORY_URL;
+  /** 本 fork 的仓库地址（上游是 DSH-APP/DSHA，此处指自己的仓库）。 */
+  public static final String GITHUB_URL =
+      "https://github.com/" + com.deepseekharness.app.BuildConfig.FORK_REPOSITORY_SLUG;
+
+  /** 本 fork 维护者（GitHub 用户名）；关于页的「交流与反馈」指向其主页。 */
+  public static final String MAINTAINER = "steveneng2020";
   public static final String QQ_GROUP = "975836806";
 
   private AboutDialog() {}

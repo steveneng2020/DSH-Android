@@ -29,6 +29,7 @@
     <string name="dns_auto" formatted="false">"자동 호환성(권장)"</string>
     <string name="dns_ipv4" formatted="false">"IPv4 DNS 호환성"</string>
     <string name="dns_native" formatted="false">"네이티브 듀얼 스택 확인"</string>
+    <string name="icon_style_cancel" formatted="false">"취소"</string>
     <string name="nh_sub" formatted="false">"네트워크 이상은 기록만 하고 복구하지 않습니다"</string>
     <string name="nh_title" formatted="false">"네트워크 상태"</string>
     <string name="paste_text" formatted="false">"붙여넣기"</string>

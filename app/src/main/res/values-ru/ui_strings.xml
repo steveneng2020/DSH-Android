@@ -29,6 +29,7 @@
     <string name="dns_auto" formatted="false">"Авто (рекомендуется)"</string>
     <string name="dns_ipv4" formatted="false">"Совместимость с IPv4 DNS"</string>
     <string name="dns_native" formatted="false">"Двойной стек"</string>
+    <string name="icon_style_cancel" formatted="false">"Отмена"</string>
     <string name="nh_sub" formatted="false">"Сетевые сбои только записываются, не исправляются"</string>
     <string name="nh_title" formatted="false">"Состояние сети"</string>
     <string name="paste_text" formatted="false">"Вставить"</string>

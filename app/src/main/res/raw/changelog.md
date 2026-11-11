@@ -1,9 +1,12 @@
-# DSHA 0.2.2-20261111.0200-dsh0.2.2-rc.1 / build357
+# DSHA v1.4 20261111@0.2.2-rc.1 / build20050357
 
-- build355 布局修正（T143 v3，`d3c07b4f8`）：build355 正式包内实际是 T143 首版布局（单卡片并排、设置页旧间距），本版改成用户在 build353 `.debug` 预览包上确认的 v3。只改 `app/src/main/res/layout/fragment_settings.xml` 与 `plugin_list_footer.xml` 两个布局文件，无 Java、无文案键、无点击行为变化。
-- 设置页顶部空白收紧：页内「设置」大标题已移除后，容器 `paddingTop` 由 `shell_page_top` 改为 `shell_section_margin`（10dp），第一组 `ShellSectionLabel` 去掉 `layout_marginTop="@dimen/shell_section_gap"`（24dp），首组不再叠加两段留白，直接接外壳页头。
-- 插件页本地插件入口改为两个独立卡片：外层 `pluginLocalCard` 不再套 `ShellCard`，只作横向容器；「导入插件包」与「导出插件」（`btnImport` / `btnExport`）各自使用 `ShellCard` 圆角包裹、`?attr/selectableItemBackground` 按压前景、`clickable` / `focusable` 与 `shell_row_min_height` 内边距，左右各 6dp 外边距形成 12dp 间隔。副标题与右侧箭头保持移除，id、文案键与点击语义不变。
-- 受管运行时不变：改动只在两个 app 层布局文件内，不在 `runtime-descriptor` 的输入内；合并树用 `tools/prepare-runtime-descriptor.py --check` 校验 **`8e54085c`** 不变（205 个输入）。fixed-inputs 冻结沿用锁定的 `fixed-inputs-20261105e`，内置 `dsh-web-mobile` 3.3.5 与默认启用不变。
-- 版本与范围：版本码提升为 356（基于已发布的 build355 / `584390e75`）；DSHA 修订号保持 `0.2.1-rc.5`，内置 DSH 为 `0.2.2-rc.1`。这是一次只修正已发布布局形态的 hotfix；设备 shell 白名单与执行期护栏不放宽，授权 fail-closed 语义、密码文本硬阻断与敏感界面策略不变。build355 已作为正式包发布（tag `dsha-a-su-build355-20261110-150000` @ `584390e75`）；目标 tag `dsha-a-su-build356-20261110-170000` 由 release 工作流在用户确认后创建。
-- **未验证 / 未验收**：v3 形态已在 build353 `.debug` 预览包由用户确认真机效果；build356 整体尚未真机验收，平板横竖屏、短屏与 1.3× 字体下的顶部留白与两个卡片间距仍待核对。验收项是 354→356 覆盖安装成功、数据完好、READY，以及设置页与插件页 v3 形态在真机上的表现；build355 已发布但整体尚未真机验收，T145 / T146 核对点按 build355 的记录继续跟踪。
-- 验证范围：发布身份与前置检查（versionCode 356 / versionName 与 `ci/release-identity.json` 一致；`check-release-prerequisites.py` PASS）、固定输入按锁 `fixed-inputs-20261105e` 从 prep/build353-release 复制并记录逐文件 sha256（/root/.cache/prep-build356/fixed-inputs-copied.sha256，与 build355 回执逐字节一致；恢复归档另记 recovery-archives-copied.sha256）、宿主 contracts 整组 12 项（固定输入运行时工具 / descriptor 源 205 assets + 481 launchers / 第三方声明 / 内置插件 / 凭据路径 / semver / host manifest 251 / 源卫生 / UI i18n newFindings 0 / changelog / 文档链接 55 文档 1253 链接 0 error）、`prepare-runtime-descriptor.py --check`（`8e54085c`）、全树 Java 格式（1692 文件 / 0 待格式化）、`git diff --check`（54 文件 / 8 分片 0 错）、`UpdateVersionPageTest`；全量 `:app:testStandardDebugUnitTest`（4427 例，10 例 aarch64 Robolectric 环境基线失败如实记录，0 error / 0 跳过）与 `:app:lintStandardRelease`（0 error / 599 warning，任务通过）；host 测试 fast 90/95、runtime 72/128——失败均为本机环境 / CI 夹具缺失（与本次布局改动无关，不预写通过）；正式签名 assemble 不在本机执行（无发布 keystore）。
+本版以 DSHA 上游 0.2.2（build357）为新基座重建，内置 DSH 0.2.2-rc.1，Ubuntu 基础环境仍为 10。
+
+- 基座升级：从上游 0.2.1-rc.2（build190）整体升级到 0.2.2（build357），含移动界面 v5、设备能力授权页独立成页、维护期插件注册死锁修复。
+- 单变体：移除兼容线与 GeckoView，只发布 Standard（Android 11 及以上、arm64-v8a、系统 WebView）。
+- 保留本 fork 的自有功能：应用图标可点击切换六套配色、更新日记面板、上游对比、推理档位自动适配、插件原生依赖体检。
+- 发行身份保持独立：包名 `dsh.android.dev`、自有发布证书，与上游 `dsh.android.client` 互不通用，覆盖安装需同签名。
+- 更新源仍指向本仓库的 `updates.json`，APK 由本仓库 Releases 提供。
+
+本版 `versionCode` 为 `20050357`。已安装旧版的用户点“检查更新”不会看到此版本（更新器要求 versionCode 更大），需手动下载覆盖安装。
+实际软件检查与设备验收范围以本轮交付回执为准，不代表完整设备矩阵已验证。

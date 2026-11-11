@@ -29,6 +29,7 @@
     <string name="dns_auto" formatted="false">"自動相容（推薦）"</string>
     <string name="dns_ipv4" formatted="false">"IPv4 DNS 相容"</string>
     <string name="dns_native" formatted="false">"原生雙棧解析"</string>
+    <string name="icon_style_cancel" formatted="false">"取消"</string>
     <string name="nh_sub" formatted="false">"網路異常只記錄不修復"</string>
     <string name="nh_title" formatted="false">"網路健康"</string>
     <string name="paste_text" formatted="false">"貼上"</string>

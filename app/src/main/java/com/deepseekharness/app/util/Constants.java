@@ -13,6 +13,8 @@ public final class Constants {
 
   /** 当前维护仓库；作者与历史报告链接分别保持原来源。 */
   public static final String REPOSITORY_URL = "https://github.com/DSH-APP/DSHA";
+  /** 上游仓库地址（本 fork 新增）：关于页与「上游对比」用它显示跟随情况。 */
+  public static final String UPSTREAM_REPOSITORY_URL = "https://github.com/DSH-APP/DSHA";
 
   public static final String SITE_HOST = "dsha.cc";
   public static final String SITE_URL = "https://" + SITE_HOST + "/";

@@ -29,6 +29,7 @@
     <string name="dns_auto" formatted="false">"Auto (recommandé)"</string>
     <string name="dns_ipv4" formatted="false">"Compatibilité DNS IPv4"</string>
     <string name="dns_native" formatted="false">"Résolution double pile"</string>
+    <string name="icon_style_cancel" formatted="false">"Annuler"</string>
     <string name="nh_sub" formatted="false">"Les incidents réseau sont enregistrés, pas réparés"</string>
     <string name="nh_title" formatted="false">"Santé du réseau"</string>
     <string name="paste_text" formatted="false">"Coller"</string>

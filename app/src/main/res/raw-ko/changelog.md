@@ -1,9 +1,12 @@
-# DSHA 0.2.2-20261111.0200-dsh0.2.2-rc.1 / build357
+# DSHA v1.4 20261111@0.2.2-rc.1 / build20050357
 
-- build355 레이아웃 수정(T143 v3, `d3c07b4f8`): build355 정식 패키지에는 실제로 T143 초판 레이아웃(카드 하나에 나란히, 설정 페이지의 예전 간격)이 들어 있었고, 이번 버전에서 사용자가 build353 `.debug` 미리보기에서 확인한 v3로 바꿉니다. 변경은 `app/src/main/res/layout/fragment_settings.xml`과 `plugin_list_footer.xml` 두 레이아웃 파일뿐이며 Java, 문구 키, 탭 동작은 바뀌지 않습니다.
-- 설정 페이지 상단 여백 축소: 페이지 안의 「설정」 큰 제목이 사라진 상태에서 컨테이너 `paddingTop`을 `shell_page_top`에서 `shell_section_margin`(10dp)으로 바꾸고, 첫 `ShellSectionLabel`의 `layout_marginTop="@dimen/shell_section_gap"`(24dp)을 제거해 첫 그룹이 두 겹의 여백을 쌓지 않고 셸 페이지 헤더에 바로 이어지게 했습니다.
-- 플러그인 페이지의 로컬 항목을 두 개의 독립 카드로: 바깥 `pluginLocalCard`는 `ShellCard`를 쓰지 않고 가로 컨테이너 역할만 하며, 「플러그인 패키지 가져오기」와 「플러그인 내보내기」(`btnImport` / `btnExport`)가 각각 `ShellCard` 둥근 표면, `?attr/selectableItemBackground` 누름 전경, `clickable` / `focusable`, `shell_row_min_height` 안쪽 여백을 갖고 좌우 6dp 바깥 여백으로 12dp 간격을 만듭니다. 부제와 오른쪽 화살표는 계속 제거되어 있고 id, 문구 키, 탭 의미는 그대로입니다.
-- 관리 런타임 불변: 변경은 app 계층의 두 레이아웃 파일에만 있고 `runtime-descriptor` 입력이 아닙니다. 병합 트리는 `tools/prepare-runtime-descriptor.py --check`로 **`8e54085c`**가 변하지 않았음을 검증합니다(205개 입력). fixed-inputs는 고정된 `fixed-inputs-20261105e`를 그대로 사용하며, 번들 `dsh-web-mobile` 3.3.5와 기본 활성화도 그대로입니다.
-- 버전과 범위: versionCode를 356으로 올리고(공개된 build355 / `584390e75` 기준), DSHA 개정 번호는 `0.2.1-rc.5`, 번들 DSH는 `0.2.2-rc.1`을 유지합니다. 이미 공개된 레이아웃 형태만 고치는 hotfix이며, 기기 shell 허용 목록과 실행 시 가드는 완화하지 않고, 권한 부여의 fail-closed 의미론, 비밀번호 텍스트 강제 차단, 민감 화면 정책도 바뀌지 않습니다. build355는 정식 패키지로 공개되었고(태그 `dsha-a-su-build355-20261110-150000` @ `584390e75`), 목표 태그 `dsha-a-su-build356-20261110-170000`은 사용자 확인 후 release 워크플로가 만듭니다.
-- **미검증 / 미수용**: v3 형태는 build353 `.debug` 미리보기에서 사용자가 실기기로 확인했지만, build356 전체는 아직 실기기 검증을 하지 않았습니다. 태블릿 가로·세로, 짧은 화면, 1.3배 글꼴에서의 상단 여백과 두 카드 간격은 계속 확인해야 합니다. 수용 항목은 354→356 덮어쓰기 설치 성공·데이터 보존·READY, 그리고 설정 페이지와 플러그인 페이지의 v3 형태 실기기 확인입니다. build355는 공개되었지만 전체 실기기 검증은 아직이며, T145 / T146 확인 항목은 build355 기록을 따라 추적합니다.
-- 검증 범위: 릴리스 ID와 사전 검사(versionCode 356 / versionName이 `ci/release-identity.json`과 일치, `check-release-prerequisites.py` PASS), 고정 입력은 고정된 `fixed-inputs-20261105e`에 따라 prep/build353-release에서 복사하고 파일별 sha256을 기록(/root/.cache/prep-build356/fixed-inputs-copied.sha256, build355 영수증과 바이트 단위 동일, 복구 아카이브는 별도 기록), 호스트 contracts 전체 12항목(고정 입력 런타임 도구 / descriptor 원본 205 assets + 481 launchers / 제3자 고지 / 번들 플러그인 / 자격 증명 경로 / semver / host manifest 251 / 소스 위생 / UI i18n newFindings 0 / changelog / 문서 링크 55 문서 1253 링크 0 error), `prepare-runtime-descriptor.py --check`(`8e54085c`), 전체 트리 Java 포맷(1692 파일 / 0 수정 필요), `git diff --check`(54 파일 / 8 분할, 0 오류), `UpdateVersionPageTest`; 전체 `:app:testStandardDebugUnitTest`(4427건, aarch64 Robolectric 환경 기준 실패 10건은 그대로 기록, 0 error / 0 스킵) 및 `:app:lintStandardRelease`(0 error / 599 warning, 작업 통과); 호스트 테스트 fast 90/95, runtime 72/128 — 실패는 모두 로컬 환경 / CI 픽스처 부재에 따른 것으로 이번 레이아웃 변경과 무관하며 통과로 미리 쓰지 않습니다. 서명된 assemble은 로컬에서 실행하지 않습니다(릴리스 keystore 없음).
+이 빌드는 DSHA 업스트림 0.2.2(build357)를 새 기반으로 재구성했으며 DSH 0.2.2-rc.1을 내장합니다. Ubuntu 기본 환경은 10 그대로입니다.
+
+- 기반 업그레이드: 업스트림 0.2.1-rc.2(build190)에서 0.2.2(build357)로. 모바일 UI v5, 기기 기능 권한 페이지 분리, 유지보수 중 플러그인 등록 교착 수정을 포함합니다.
+- 단일 변형: 호환 라인과 GeckoView를 제거하고 Standard만 배포합니다(Android 11 이상, arm64-v8a, 시스템 WebView).
+- 이 포크의 자체 기능 유지: 아이콘을 눌러 전환하는 6가지 색상, 업데이트 일지 패널, 업스트림 비교, 추론 단계 자동 맞춤, 플러그인 네이티브 의존성 점검.
+- 배포 신원은 독립적: 패키지 `dsh.android.dev`, 자체 배포 인증서. 업스트림 `dsh.android.client`와 호환되지 않으며 덮어쓰기 설치에는 동일 서명이 필요합니다.
+- 업데이트 소스는 계속 이 저장소의 `updates.json`이며 APK는 이 저장소 Releases에서 제공합니다.
+
+이 빌드의 `versionCode`는 `20050357`입니다. 이전 버전 사용자는 "업데이트 확인"에 이 버전이 보이지 않으며(더 큰 versionCode 필요), 직접 내려받아 덮어쓰기 설치해야 합니다.
+실제 소프트웨어 검사와 기기 검수는 이번 라운드의 인수 기록 범위에 한하며 전체 기기 매트릭스를 입증하지 않습니다.

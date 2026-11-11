@@ -53,10 +53,12 @@ def testVariantLabel = debugPackage ? 'Debug' : devPackage ? 'Dev' : sunsetTest 
 // 两套身份的包名、显示名、测试后缀、默认 key alias 与核对证书都从 ci/release-identity.<name>.json 读取；
 // versionCode / versionName 共用。未知值直接失败，不回退到任一身份，签名身份绝不混用。
 // 解析规则与 tools/release-identity.py 一致，由 tools/test-release-identity.py 交叉核对。
-def releaseIdentityNames = ['mod', 'upstream']
-def releaseIdentityName = (project.findProperty('dsha.identity') ?: 'upstream').toString()
+// 本 fork 新增第三个身份 fork（dsh.android.dev + 814ab103…3622f），与上游两个并列。
+// 默认取 fork：本仓库构建出的包必须一直是自己的发行身份。
+def releaseIdentityNames = ['fork', 'mod', 'upstream']
+def releaseIdentityName = (project.findProperty('dsha.identity') ?: 'fork').toString()
 if (!(releaseIdentityName in releaseIdentityNames))
-    throw new GradleException("UNKNOWN_RELEASE_IDENTITY: dsha.identity 只接受 mod 或 upstream，收到 '${releaseIdentityName}'")
+    throw new GradleException("UNKNOWN_RELEASE_IDENTITY: dsha.identity 只接受 fork / mod / upstream，收到 '${releaseIdentityName}'")
 def releaseIdentityFile = rootProject.file("ci/release-identity.${releaseIdentityName}.json")
 def releaseIdentity = new groovy.json.JsonSlurper().parse(releaseIdentityFile)
 if (releaseIdentity.schema != 1 || releaseIdentity.identity != releaseIdentityName
@@ -90,12 +92,21 @@ android {
         // 测试包标记：只有显式测试变体（.test/.debug/.dev）为 true。正式包恒为 false，
         // 用于只在测试包显示「反馈与诊断」导出入口；不得改为运行时猜测包名。
         buildConfigField 'boolean', 'TEST_PACKAGE', (sunsetTest || debugPackage || devPackage) ? 'true' : 'false'
+        // ── 以下由本 fork 新增（关于页 / 上游对比 / 更新源使用）──
+        buildConfigField 'String', 'UPSTREAM_REPOSITORY_SLUG', '"DSH-APP/DSHA"'
+        buildConfigField 'String', 'UPSTREAM_REPOSITORY_URL', '"https://github.com/DSH-APP/DSHA"'
+        buildConfigField 'String', 'FORK_REPOSITORY_SLUG', '"steveneng2020/DSH-Android"'
+        // 本 fork 实际同步到的上游提交（v0.2.2 / build357）
+        buildConfigField 'String', 'UPSTREAM_BASE_COMMIT', '"5e2dca92864eca21cf7cbcec35af5a7082ca9b0a"'
+        buildConfigField 'String', 'UPSTREAM_BASE_DATE', '"2026-11-10"'
+        // low flavor 已跟随上游删除；保留 false 常量以兼容既有判断分支。
+        buildConfigField 'boolean', 'LOW_ANDROID', 'false'
         // 上岛能力已并入正式包；不再有独立上岛包名或独立显示名。
         // 显示名随发布身份（DSH-A-Su / DSHA）；测试变体加后缀，便于桌面上区分两个包。
         resValue 'string', 'app_name', testVariantLabel ? releaseIdentity.appName + ' ' + testVariantLabel : releaseIdentity.appName
-        versionCode 357
+        versionCode 20050357
         // DSHA 修订号 + 固定的北京时间戳 + 内置 DSH 版本；同一交付重建不变。
-        versionName "0.2.2-20261111.0200-dsh0.2.2-rc.1"
+        versionName "v1.4 20261111@0.2.2-rc.1"
         testInstrumentationRunner project.findProperty('dsha.testRunner') ?: "com.deepseekharness.app.Rc13Instrumentation"
         ndk {
             abiFilters 'arm64-v8a'

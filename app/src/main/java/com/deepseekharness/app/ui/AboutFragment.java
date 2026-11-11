@@ -9,12 +9,24 @@ import com.deepseekharness.app.*;
 import com.deepseekharness.app.util.UiText;
 
 public final class AboutFragment extends Fragment {
+  /** 「检查上游更新」的在途请求：离开页面时必须取消，否则回调打到已销毁的视图上。 */
+  private UpstreamCompareUi.Session upstreamSession;
+
+  @Override
+  public void onDestroyView() {
+    UpstreamCompareUi.Session session = upstreamSession;
+    upstreamSession = null;
+    if (session != null) session.cancel();
+    super.onDestroyView();
+  }
+
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle saved) {
     CardPage ui = new CardPage(requireContext(), UiText.choose("关于 DSHA", "About DSHA"), "");
     android.widget.FrameLayout emblem = new android.widget.FrameLayout(requireContext());
     android.widget.ImageView mark = new android.widget.ImageView(requireContext());
-    mark.setImageResource(R.drawable.ic_ui2_prompt);
+    // fork：图标随当前配色变化，点击可切换（上游是固定装饰图）。
+    mark.setImageResource(IconSwitcher.PREVIEWS[IconSwitcher.current(requireContext())]);
     mark.setBackgroundResource(R.drawable.bg_ui2_mark);
     mark.setPadding(ui.dp(14), ui.dp(14), ui.dp(14), ui.dp(14));
     emblem.addView(
@@ -59,18 +71,21 @@ public final class AboutFragment extends Fragment {
     ui.entry(
         links,
         UiText.choose("交流与反馈", "Community and feedback"),
-        UiText.format("QQ群 %s · 问题反馈", AboutDialog.QQ_GROUP),
+        // fork：上游指向 QQ 群，本项目不维护社群，改为维护者主页 + 问题反馈。
+        UiText.format("@%s · 问题反馈", AboutDialog.MAINTAINER),
         R.drawable.ic_ui_chat,
         () ->
             new DshaDialogBuilder(requireContext())
                 .setTitle(UiText.choose("交流与反馈", "Community and feedback"))
                 .setItems(
                     new String[] {
-                      UiText.choose("打开 QQ 群", "Open QQ group"),
+                      UiText.choose("打开维护者主页", "Open maintainer profile"),
                       UiText.choose("打开问题反馈", "Open issue tracker")
                     },
                     (d, i) -> {
-                      if (i == 0) AboutDialog.openQQGroup(requireContext());
+                      if (i == 0)
+                        AboutDialog.openBrowser(
+                            requireContext(), "https://github.com/" + AboutDialog.MAINTAINER);
                       else
                         AboutDialog.openBrowser(
                             requireContext(), AboutDialog.GITHUB_URL + "/issues");
@@ -82,6 +97,70 @@ public final class AboutFragment extends Fragment {
         UiText.choose("DSHA 与随包第三方组件", "DSHA and bundled components"),
         R.drawable.ic_recovery_document,
         this::showLicenses);
+    // 更新日记 + 上游对比：与「关于」对话框同一套组件，直接内联进卡片页。
+    try {
+      LinearLayout changelogBox = new LinearLayout(requireContext());
+      changelogBox.setOrientation(LinearLayout.VERTICAL);
+      changelogBox.setPadding(ui.dp(14), ui.dp(14), ui.dp(14), ui.dp(14));
+      changelogBox.setBackground(ChangelogBoxDrawable.create(requireContext()));
+      LinearLayout.LayoutParams boxParams = new LinearLayout.LayoutParams(-1, -2);
+      boxParams.topMargin = ui.dp(20);
+      changelogBox.setLayoutParams(boxParams);
+      TextView changelogTitle =
+          ui.text(getString(R.string.about_changelog_title), 13, R.color.text);
+      changelogTitle.setTypeface(null, android.graphics.Typeface.BOLD);
+      changelogBox.addView(changelogTitle);
+      LinearLayout changelogList = new LinearLayout(requireContext());
+      changelogList.setOrientation(LinearLayout.VERTICAL);
+      LinearLayout.LayoutParams listParams = new LinearLayout.LayoutParams(-1, -2);
+      listParams.topMargin = ui.dp(6);
+      changelogBox.addView(changelogList, listParams);
+      ui.content.addView(changelogBox);
+      ChangelogPanel.populateInto(requireContext(), changelogBox, changelogList, null);
+      LinearLayout upstreamBlock = new LinearLayout(requireContext());
+      upstreamBlock.setOrientation(LinearLayout.VERTICAL);
+      LinearLayout.LayoutParams upstreamParams = new LinearLayout.LayoutParams(-1, -2);
+      upstreamParams.topMargin = ui.dp(10);
+      changelogBox.addView(upstreamBlock, upstreamParams);
+      TextView upstreamToggle =
+          ui.text(getString(R.string.about_upstream_expand), 12, R.color.text_secondary);
+      upstreamToggle.setId(R.id.about_upstream_toggle);
+      upstreamToggle.setPadding(0, ui.dp(6), 0, ui.dp(6));
+      upstreamBlock.addView(upstreamToggle);
+      LinearLayout upstreamBody = new LinearLayout(requireContext());
+      upstreamBody.setOrientation(LinearLayout.VERTICAL);
+      upstreamBody.setId(R.id.about_upstream_body);
+      upstreamBody.setVisibility(View.GONE);
+      upstreamBlock.addView(upstreamBody);
+      TextView upstreamBase = ui.text("", 11, R.color.text_secondary);
+      upstreamBase.setId(R.id.about_upstream_base);
+      TextView upstreamLatest = ui.text("", 11, R.color.text_secondary);
+      upstreamLatest.setId(R.id.about_upstream_latest);
+      TextView upstreamVerdict = ui.text("", 11, R.color.text_secondary);
+      upstreamVerdict.setId(R.id.about_upstream_verdict);
+      upstreamBody.addView(upstreamBase);
+      upstreamBody.addView(upstreamLatest);
+      upstreamBody.addView(upstreamVerdict);
+      ui.button(upstreamBody, getString(R.string.about_upstream_check), false, () -> {})
+          .setId(R.id.about_upstream_check);
+      upstreamSession =
+          UpstreamCompareUi.wire(
+              requireContext(),
+              upstreamBlock,
+              upstreamToggle.getId(),
+              upstreamBody.getId(),
+              upstreamBase.getId(),
+              upstreamLatest.getId(),
+              upstreamVerdict.getId(),
+              R.id.about_upstream_check,
+              R.id.about_upstream_url);
+    } catch (Throwable ignored) {
+      TextView fallback = new TextView(requireContext());
+      fallback.setText(R.string.about_changelog_unavailable);
+      fallback.setTextColor(requireContext().getColor(R.color.text_secondary));
+      fallback.setTextSize(12f);
+      ui.content.addView(fallback);
+    }
     ui.footer.setVisibility(View.GONE);
     return ui.root;
   }

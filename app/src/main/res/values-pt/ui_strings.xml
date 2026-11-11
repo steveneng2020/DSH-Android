@@ -29,6 +29,7 @@
     <string name="dns_auto" formatted="false">"Auto (recomendado)"</string>
     <string name="dns_ipv4" formatted="false">"Compatibilidade DNS IPv4"</string>
     <string name="dns_native" formatted="false">"Pilha dupla nativa"</string>
+    <string name="icon_style_cancel" formatted="false">"Cancelar"</string>
     <string name="nh_sub" formatted="false">"As falhas de rede são registadas, não reparadas"</string>
     <string name="nh_title" formatted="false">"Saúde da rede"</string>
     <string name="paste_text" formatted="false">"Colar"</string>
