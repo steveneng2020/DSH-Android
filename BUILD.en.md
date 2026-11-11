@@ -1,40 +1,46 @@
-# DSH-A-Su build and signing instructions
+# DSHA build instructions
 
-> Current identity (build356): `DSH-A-Su` / `io.github.sunsetrne.dsha` / `0.2.1-rc.5-20261110.1700-dsh0.2.2-rc.1` / versionCode 356.
-> Single Standard variant: minSdk 30 (Android 11+), arm64-v8a, system WebView. The old `low`/GeckoView line and the separate island package are gone.
-> Signing: a newly created Mod release certificate (SHA-256 `a4b0413c67fa46dd30dc7e2bce3ad56151ed8bfde2a3315fff685baf786b5d5d`); the original E7E3 key is no longer used.
-> Fixed build inputs: published as a public pre-release Release asset and pinned by SHA-256; see [docs/fixed-build-inputs.md](docs/fixed-build-inputs.md).
-> Historical build receipts and old identity numbers remain in [CHANGELOG.md](CHANGELOG.md) and [docs/releases/](docs/releases/); they are not inputs for the current build or signing identity.
+> **This file describes the fork only** ([steveneng2020/DSH-Android](https://github.com/steveneng2020/DSH-Android)).
+> Upstream [DSH-APP/DSHA](https://github.com/DSH-APP/DSHA) has its own build docs; do not mix them.
+>
+> Version, package and signing identity come from `app/build.gradle` and
+> `ci/release-identity.json` (`dsh.android.dev`, certificate `814ab103...3622f`); this file does
+> not duplicate those numbers.
 
-Read [README](README.en.md), [AGENTS](AGENTS.en.md) and [CONTRIBUTING](CONTRIBUTING.en.md) first. `app/build.gradle`, `ci/release-identity.json` and `ci/sunset-inputs.lock.json` are the three authoritative sources for the current build identity.
+Read [README](README.en.md), [AGENTS](AGENTS.en.md) and [CONTRIBUTING](CONTRIBUTING.en.md) first.
 
 ## Environment and variants
 
 | Input | Requirement |
 |---|---|
-| JDK / native language | Java 17, no Kotlin |
+| JDK / native application language | Java 17, no Kotlin |
 | Gradle / AGP | Repository Wrapper 9.3.1 / AGP 9.1.1 |
 | Android SDK | `platforms;android-37.0`, build-tools 36.0.0; compile/target API 37 |
-| NDK | 26.3.11579264 (only for native builds; the repo ships prebuilt arm64 JNI) |
-| Python / Node | Python 3.9+ for generators (`DSHA_PYTHON`); Node 24; CI pins in `ci/toolchain.lock.json` |
-| Standard | minSdk 30, system WebView, arm64-v8a (the only variant) |
+| NDK | 26.3.11579264 (only needed when changing JNI) |
+| Python / Node | Python 3.9+ for generators; CI pinning is in `ci/toolchain.lock.json`; Node 24 |
+| Standard | minSdk 30, system WebView, arm64-v8a |
 
-There is one Standard build line. The test variant only changes package/version via `-Pdsha.sunsetTest=true` (`io.github.sunsetrne.dsha.test`); it coexists with the release package and has isolated data. The original `dsh.android.client` and the older `com.dsh.client` are separate packages that this Mod does not overwrite.
+**Only standard is built.** The source tree still carries the `low` flavor (minSdk 23, GeckoView), but it was never released and is not a distribution target. Windows skips cannot stand in for Linux-specific tests.
 
-Set `sdk.dir` in local `local.properties`, and point `JAVA_HOME`, `ANDROID_SDK_ROOT` (or `ANDROID_HOME`) and `DSHA_PYTHON` at real tools. Do not copy another developer's absolute toolchain paths. `app/build.gradle` defines `versionCode`, `versionName` and `dshaApkNameVersion`; this page does not maintain a competing set of numbers.
+Set `sdk.dir` in local `local.properties`, and point JAVA_HOME, ANDROID_SDK_ROOT/ANDROID_HOME, and DSHA_PYTHON to installed tools. Do not copy another developer's absolute toolchain paths. `app/build.gradle` defines `versionCode`, `versionName`, and `dshaApkNameVersion`; this page does not maintain another competing set of current version numbers.
 
-## Fixed build inputs
+## Input preparation and proofs
 
-The offline rootfs, DSH runtime, Ubuntu tools, pnpm, Python support, glibc Python, ADB wheels and recovery archives are not committed to Git. `tools/ci-assets.py` restores them according to `ci/sunset-inputs.lock.json`, which pins the public pre-release asset URL, SHA-256, byte count, format and Release/asset names.
+Git retains the complete application, resources, locked generators/checkers, and small precompiled JNI/vendor/interpreter dependencies required for builds and covered by notices/locks. Large generated rootfs, DSH, and recovery archives are excluded from Git. Retain the actual restrictions on unknown-source or closed-source vendor inputs; do not claim all native vendor code is reproducible from source. See [CONTRIBUTING](CONTRIBUTING.en.md) for exact boundaries and nine explicit audit-JSON exceptions: six build-input metadata files plus three historical-document/provenance metadata files, without opening the whole audit directory.
+
+Distributable source uses actual LF bytes. Eleven managed/canonical bytepins in `.gitattributes` and historical originals retain exact bytes; do not normalize signed inputs across the repository. Nineteen small binary inputs remain as listed and are not rewritten by text newline rules. Shared UUID validation comes from Ids; four call sites have their shared dependency restored while preserving historical UUID format.
+
+Ubuntu base identity is independent of DSH and UI versions. `offline-rootfs.bin` / `dsh-runtime.bin` use split-runtime-v1. `tools/recovery-runtime/lock.json` constrains independent emergency pinned inputs; the main environment cannot become a rescue dependency. A source checkout without large archives is not a complete APK and cannot skip integrity gates.
+
+When managed inputs change, update assets through their actual generators, then explicitly generate proofs:
 
 ```bash
-python3 tools/ci-assets.py \
-  --url "$(python3 -c 'import json;print(json.load(open("ci/sunset-inputs.lock.json"))["url"])')" \
-  --sha256 "$(python3 -c 'import json;print(json.load(open("ci/sunset-inputs.lock.json"))["sha256"])')"
-python3 tools/prepare-runtime-descriptor.py --check   # use --write after changing inputs and review the diff
+python3 tools/prepare-backup-assets.py --write
+python3 tools/prepare-runtime-descriptor.py --write
+python3 tools/prepare-test-runtime.py
 ```
 
-See [docs/fixed-build-inputs.md](docs/fixed-build-inputs.md) for the contents, restore flow, upgrade/rollover procedure and integrity requirements. A source-only checkout without the fixed inputs can run source-only checks but cannot produce a complete APK.
+Check generated proofs against actual bytes. Normal Gradle builds use check mode; an old cache must not skip new inputs. `app/build/test-runtimes/current.json` and source/content fingerprints constrain the current fixture. An arbitrary old directory is not the current runtime.
 
 ## Software validation
 
@@ -42,30 +48,45 @@ See [docs/fixed-build-inputs.md](docs/fixed-build-inputs.md) for the contents, r
 python3 tools/run-host-tests.py --check-manifest
 python3 tools/run-host-tests.py --stage fast
 python3 tools/check-source-hygiene.py
-python3 tools/check-ui-i18n.py
-python3 tools/localize-android-ui.py --resources-only --check
-python3 tools/generate-changelog.py --check
-./gradlew :app:testStandardDebugUnitTest :app:lintStandardRelease
+./gradlew :app:testStandardDebugUnitTest :app:testLowDebugUnitTest \
+  :app:lintStandardRelease :app:lintLowRelease
 python3 tools/run-host-tests.py --stage runtime
 python3 tools/verify-stability.py --stage software
 ```
 
-`preBuild` in `app/build.gradle` also runs managed-asset, built-in plugin, credential-rule, proroot, language and changelog gates; do not bypass a failing gate to produce a package. On Windows use `gradlew.bat`. When AGP/aapt2 is unavailable, `tools/run-unit-tests.py` is a pure-logic fallback, not a replacement for full Android compilation, APK checks or resource gates.
+On Windows use `gradlew.bat` and a real Python executable instead of an unavailable system alias. When AGP/aapt2 cannot run, `tools/run-unit-tests.py` is a pure-logic fallback, not a replacement for full Android compilation, APK checks, or resource gates. Classify platform skips, unrun items, and Lint warnings honestly rather than calling them passes.
+
+`tools/verify-plugin-upgrade-gate.py` checks automatic commit/enable behavior, user disabling/safe mode, actual dependencies, plugin transactions, and managed assets. Production plugins permit unlocked resolution, lifecycle scripts, and pnpmfile. Do not revive historical “native review/dependency freeze” test criteria as current requirements.
 
 ## Release packaging and signing
 
-Explicitly supply `DSHA_KEYSTORE`, `DSHA_KEYSTORE_PASSWORD` and `DSHA_KEY_PASSWORD`; the alias defaults to `dsha-a-su` and can be overridden with `DSHA_KEY_ALIAS`. `ci/release-identity.json` is authoritative: `packageName = io.github.sunsetrne.dsha`, `certificateSha256 = a4b0413c67fa46dd30dc7e2bce3ad56151ed8bfde2a3315fff685baf786b5d5d`.
-
-Before `assembleStandardRelease`, `packageStandardRelease` and `validateSigningStandardRelease`, `verifyPublishCertificate` checks the keystore certificate and the applicationId against that record and stops packaging on any mismatch. Historical E7E3 or a debug certificate can no longer produce a release package. Private keys are never committed; rotating the key prevents over-the-top upgrades of already installed Mod builds.
+Explicitly supply existing `DSHA_KEYSTORE`, `DSHA_KEYSTORE_PASSWORD`, and `DSHA_KEY_PASSWORD` (optional `DSHA_KEY_ALIAS`). `ci/release-identity.json` defines the signing identity: certificate SHA-256 `814ab103...3622f`, alias `dsha-release`, same key as the installed build so upgrades install over it. **E7E3 belongs to the upstream `dsh.android.client` era and must never be used here.** A key filename containing debug does not make a release APK debuggable; verify actual `debuggable=false`.
 
 ```bash
 ./gradlew :app:assembleStandardRelease
 ```
 
-The artifact is `app/build/outputs/apk/standard/release/dsha-<dshaApkNameVersion>.apk` and must ship with a `.sha256` computed from the actual file. Verify the real APK's package name, versionCode/versionName, `debuggable=false`, arm64 ABI, certificate SHA-256 and managed-asset/recovery-archive digests. Intermediate `app/build` packages and unsigned CI packages (`-Pdsha.unsignedPackage=true`) are never presented as releases.
+The delivery scope is standard. Software validation covers the standard tests and Release Lint,
+plus the actual standard APK/assets/ELF, signing, licensing, plugin/emergency gates, and exact
+digests. Record selected JUnit classes, skips, cache reuse, and unrun scope separately, without
+claiming a clean whole-repository or fully cold-network build.
 
-## Phones and historical scope
+Product: `app/build/outputs/apk/standard/release/app-standard-release.apk`. Verify package
+`dsh.android.dev`, certificate `814ab103...3622f` (v1/v2/v3), `debuggable=false`, minSdk 30,
+arm64-v8a, `sha256` and byte size.
 
-This build change does not include device installation, start/stop, input or model-conversation acceptance. User data, sessions, configuration, plugins and unknown runtime state are preserved; a “normal Stop” message alone does not prove exit. Historical device receipts bind their own APK and time and cannot become new-package acceptance.
+**Publishing** (this repository is the only channel; see [UPDATES-HOWTO.md](UPDATES-HOWTO.md)):
+upload the APK to a Release here, update `updates.json` (`versionCode` strictly greater than the
+published value), push `main`. Do not touch the upstream repository, publish there, or deploy a
+website. Never upload private keys, user data, device screenshots or logs.
 
-Linux tmpfs publication tests do not prove persistent-disk, power-loss or Android FUSE behavior. Android 10 and below are outside the supported range; Android 6/7, vendor Root/Shizuku and 16 KiB matrices remain historical records only. See the [module map](docs/en/module-map.md) and [security model](docs/en/security-model.md) for responsibilities and controls, and the [project handbook](docs/en/project-architecture-handbook.md) and [documentation index](docs/en/index.md) before maintaining source.
+## Phones and acceptance scope
+
+Phone operations follow the current authorization; do not infer an exit from a "normal Stop"
+message. Old build130/build142 audit results belong to their original dates and artifacts and
+cannot be reused as evidence for a new build. Linux tmpfs tests do not prove persistent-disk,
+power-loss or Android FUSE behaviour, and no software check proves a real device matrix.
+Virtual screen, accessibility and vendor ROM behaviour are declared per actual evidence; what was
+not run is reported as not run.
+
+Before maintaining source, consult the [project handbook](docs/en/project-architecture-handbook.md) and [documentation index](docs/en/index.md). Engine, port, and DNS pages separate current defaults from historical migrations.

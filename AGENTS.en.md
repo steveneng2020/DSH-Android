@@ -1,35 +1,73 @@
 # AGENTS.md — English contributor and agent guide
+> **This guide is for AI agents and new contributors.** Read it once and you can work
+> without scanning the whole repository. Read [README.en.md](README.en.md) first.
+>
+> **This is a fork**: [steveneng2020/DSH-Android](https://github.com/steveneng2020/DSH-Android),
+> not the upstream [DSH-APP/DSHA](https://github.com/DSH-APP/DSHA). Package `dsh.android.dev`,
+> release certificate SHA-256 `814ab103...3622f`, **not interchangeable** with upstream
+> `dsh.android.client` / E7E3: no cross-install, no shared data (migrate with backup
+> export/restore). Upstream is a read-only reference; this project does not push to it and
+> does not publish to it.
+>
+> **Three copyright layers** (see [LICENSE](LICENSE)): DeepSeek Harness
+> (`deepseek-ai/deepseek-harness`, MIT) -> upstream Android launcher DSHA (`DSH-APP/DSHA`)
+> -> this project (`steveneng2020/DSH-Android`). This project contains no model or agent
+> implementation; it bundles the official DSH npm runtime and is not affiliated with,
+> sponsored by or endorsed by the authors of the two layers above.
 
+## Repository facts (current; the code is authoritative)
 
-> **Status**: `0.2.1-rc.5-20261110.1700-dsh0.2.2-rc.1` / build356 / `io.github.sunsetrne.dsha` / DSH-A-Su / single Standard.
-> Main branch `main`; Android 11+ (API 30) / arm64; proot by default, proroot optional; bundled DSH 0.2.2-rc.1.
-> The island feature is folded into the regular package; the old low/GeckoView line and the separate island package are removed; signing uses the Mod-owned certificate (see BUILD.en.md).
+- Shape: Gradle single module `:app`, **pure Java 17 (0 .kt files)**, arm64-v8a.
+- App: package `dsh.android.dev`, `standard` flavor (minSdk 30, system WebView). Version and
+  file names come from `app/build.gradle`; this file does not keep a second set of numbers.
+- Bundled DSH: `@deepseek-ai/dsh` **0.2.2-rc.1**, locked by
+  `tools/dsh-runtime/package-lock.json`. `Constants.DSH_VERSION`, `package.json`, the lock
+  and `runtime-patches.json` must agree - `verifyBundledDshGeneration` rejects mixed
+  generations at configuration time.
+- Runtime: Ubuntu 24.04 arm64 + proot (default) / proroot (explicit opt-in), base identity 10.
+- Updates: in-app "check for updates" reads only this repository's `main`
+  [updates.json](updates.json); APKs are served from this repository's Releases.
+  Maintenance rules in [UPDATES-HOWTO.md](UPDATES-HOWTO.md).
+- Changelog must agree across three faces: `CHANGELOG.md` (repo),
+  `docs/releases/build{code}-changes.{zh,en}.md` -> `app/src/main/res/{raw,raw-en}/changelog.md`
+  (full text, generator-guarded), and `app/src/main/res/{raw,raw-en}/changelog_recent.json`
+  (summary cards). When it drifts run `python3 tools/check-changelog-sync.py --write`;
+  the gate runs in `ci-fast` and `verify-stability`.
 
-DSHA's entry point for AI agents and new contributors — read [README](README.en.md) first, then this file, so you do not need to scan the whole repository.
+### Build tasks (standard only)
 
-**Repository facts**: Java 17 / `:app` / arm64; mobile UI 3.3.5; proot by default with optional proroot; pinned offline inputs are restored by `tools/ci-assets.py`. Build, signing and gates are documented in [BUILD.md](BUILD.md) and [CONTRIBUTING.md](CONTRIBUTING.md).
+```bash
+python3 tools/run-host-tests.py --stage fast      # host tests
+./gradlew :app:testStandardDebugUnitTest          # unit tests
+./gradlew :app:assembleStandardRelease            # release build (needs release signing)
+```
 
-Maintenance entry points: [documentation index](docs/en/index.md), [project handbook](docs/en/project-architecture-handbook.md), [permissions](docs/en/device-permissions-architecture.md), [runtime/data/plugins](docs/en/runtime-data-plugin-architecture.md), [runtime engines](docs/en/runtime-engines.md), [ports](docs/en/ports-and-networking.md), [virtual display](docs/en/virtual-screen-architecture.md), [ADR0003](docs/en/adr/0003-virtual-screen-lifecycle-and-input.md), [provenance](docs/en/references-and-provenance.md).
-
-**History**: build and acceptance receipts for each version live in [CHANGELOG.md](CHANGELOG.md) and [docs/releases/](docs/releases/); directory counts below are historical indexes — trust the code.
+The `low` flavor still exists in the source tree but was **never released** and is not a
+distribution target; user-facing docs do not mention it.
 
 ---
 
-## Directory map — historical build 170 counts, current responsibility navigation
+## Directory map (measured 2026-11-10)
 
 ```text
-app/src/main/java/com/deepseekharness/app/
-├── *.java (root package, 27) Device/services: accessibility, bridge, LAN, overlay, Shizuku/Root, PTY
-├── ui/      (69)             MainActivity, Fragments, Activities, dialogs
-├── core/    (27)             HarnessController, maintenance barrier, backup tasks, diagnostics
-├── runtime/ (18)             ProotBootstrap, ContainerRuntime, WebProcessManager, installation
-├── backup/  (62)             v5 encrypted backup, restore, migration, historical formatting, automatic backup
-├── vscreen/ (10)             Channels, preview, input, accessibility bridge
-├── recovery/(4)             Independent emergency DSH lifecycle, separate from the main environment
-├── bridge/  (3)              AppBridge contract, AdbBridge, LAN access
-├── data/    (3)              KeyVault (Keystore), portable settings, export
-└── util/    (118)            Pure logic, no Android API imports; unit tests required
+app/src/main/java/com/deepseekharness/app/          603 .java files (main)
+├── *.java (root package, 29) Device/services: accessibility, bridge, LAN, overlay, Shizuku/Root, PTY
+├── ui/      (91)             MainActivity, Fragments, Activities, dialogs
+├── core/    (47)             HarnessController, maintenance barrier, backup tasks, diagnostics
+├── runtime/ (56)             ProotBootstrap, ContainerRuntime, WebProcessManager, installation
+├── backup/  (79)             v5 encrypted backup, restore, migration, historical formatting, automatic backup
+├── vscreen/ (27)             Channels, preview, input, accessibility bridge
+├── recovery/(5)              Independent emergency DSH lifecycle, separate from the main environment
+├── bridge/  (9)              AppBridge contract, AdbBridge, LAN access
+├── data/    (4)              KeyVault (Keystore), portable settings, export
+├── device/ diagnostics/ screen/ capabilities/ skills/  23 total (device audit, diagnostics, screens, capability probes)
+└── util/    (233)            Pure logic, no Android API imports; unit tests required
+
+1072 .java files in total (incl. test 389, androidTest 10, debug 39, deviceAudit 21)
 ```
+
+Counts are navigation aids, not contracts; `util/` holds 233 pure-logic classes, so check for
+an existing class with the same responsibility before adding one.
 
 ### Root package (`com.deepseekharness.app`): devices and system services
 
@@ -55,7 +93,7 @@ For Root maintenance, use [permission architecture](docs/en/device-permissions-a
 
 | Layer | Key classes | Responsibility |
 |---|---|---|
-| `ui/` | MainActivity / OnboardingActivity / ExtractActivity (maintenance detail) / Launch·Config·Settings·Plugin·Workspace Fragment / WebPreviewActivity | UI and startup gates; first deployment runs in the background inside onboarding with a deployment capsule; over-the-top updates open the full-screen maintenance page |
+| `ui/` | MainActivity / WelcomeActivity / Launch·Config·Settings·Plugin·Workspace Fragment / WebPreviewActivity | UI and startup gates |
 | `core/` | `HarnessController` (historically about 57 KB, orchestration core) | Start/stop dsh and capture authenticated links. **Do not add new responsibilities here**; create focused collaborators |
 | `core/` | `ConfigStore` | Sole configuration read/write entry: port/model/workdir/API key |
 | `core/` | `InstallRepository` / `MaintenanceCoordinator` / `RuntimeTasks` / `StartupDiagnostics` | Install state, maintenance barrier, running-task locks, startup diagnostics |
@@ -70,14 +108,18 @@ For Root maintenance, use [permission architecture](docs/en/device-permissions-a
 
 ---
 
-## Test layout — historical build 170 snapshot
+## Test layout (measured 2026-11-10)
 
-These counts describe the base's historical distribution only. Use the current report/receipt for selected classes/XML, failures/errors/skips, and final software results. Do not derive execution counts from static files. The [historical F11 record](docs/releases/v0.2.1-rc.2-build190-fix11-20261021.md) describes only F11's execution.
+`app/src/test/java/com/deepseekharness/app/` contains **389** test classes: `util/` 213,
+`backup/` 54, `core/` 35, `runtime/` 30, `vscreen/` 28, `ui/` 14, `data/` 2, `recovery/` 2,
+`bridge/` `capabilities/` `screen/` `skills/` 1 each, root 1.
 
-`app/src/test/java/com/deepseekharness/app/` historically contained 172 test classes: `util/`112, `backup/`45, `core/`6, `runtime/`6, `vscreen/`1, `ui/`1, root 1 (`LanAuthTest`).
+**Static class counts are not execution counts** and are not pass evidence: actual
+pass/fail/skip comes from the JUnit XML of that run and the receipts under
+[docs/releases/](docs/releases/).
 
 ```bash
-bash build.sh :app:testStandardDebugUnitTest   # Complete unit-test task
+./gradlew :app:testStandardDebugUnitTest   # full unit tests (standard)
 ```
 
 Locked invariants that refactoring must preserve:
@@ -108,8 +150,8 @@ Read the [security model](docs/en/security-model.md) first. Essential boundaries
 
 ### Versions and builds
 
-- **Current identity comes from `app/build.gradle`, `ci/release-identity.json` and [CHANGELOG.md](CHANGELOG.md).** build356 / DSHA revision `0.2.1-rc.5` (bundled DSH 0.2.2-rc.1) / `io.github.sunsetrne.dsha` / DSH-A-Su / single Standard. Earlier code/build numbers, the old `dsh.android.client` package and the historical E7E3 signature are records only, not current build or signing inputs.
-- `standard`: minSdk 30 (Android 11+), system WebView, arm64-v8a. It is the only build line; the task is `assembleStandardRelease`. The `low`/GeckoView line and legacy proot/loader are deleted (`assembleLowRelease` no longer exists), so **Android 10 and below are no longer supported**. The test variant only changes the package via `-Pdsha.sunsetTest=true` (`io.github.sunsetrne.dsha.test`).
+- **Version and signing identity come from `app/build.gradle` and `ci/release-identity.json`**: package `dsh.android.dev`, certificate SHA-256 `814ab103...3622f`. E7E3 is the **upstream** debug certificate from the `dsh.android.client` era; it is unrelated to this fork and no build here may sign with it.
+- `standard`: minSdk 30, system WebView; build task `assembleStandardRelease`. The source tree still carries the `low` flavor (minSdk 23, GeckoView 143) and `tools/build-low-proot.py`, but **that build was never released** and is not a distribution target; user-facing docs do not describe it, and `docs/android-low.md` is upstream historical material.
 - Offline rootfs (`assets/offline-rootfs.bin`) is **not committed**; preparation scripts generate it. `offline-rootfs.layout=split-runtime-v1` marks separate Ubuntu and `dsh-runtime.bin` packages; builds check both digests.
 - `tools/dsh-runtime/package-lock.json` locks new dsh dependencies. `tools/prepare-runtime-descriptor.py` generates independent managed-contract descriptors; the APK version is diagnostic context only. Update managed trees within the same base while keeping personal data in place. **UI-only APK updates do not replace the environment; ordinary dsh updates do not increment the Ubuntu base.**
 - `tools/ubuntu-tools/packages.lock.json` locks offline curl/git/certificates (`tools/prepare-ubuntu-tools.py` generates `ubuntu-tools.bin`). Web ES compatibility dependencies are locked in `tools/web-compat/` (`node tools/prepare-web-compat.mjs`). Generated files are not committed, and builds verify digests.
@@ -152,15 +194,14 @@ Read the [security model](docs/en/security-model.md) first. Essential boundaries
 - **Microphone:** declare both `RECORD_AUDIO` and `MODIFY_AUDIO_SETTINGS`. `BrowserMicrophone` requests permission only on Web request, not ordinary startup. Allow pure audio only from the current local page; reject camera/screen audio. An old callback cannot approve a new page.
 - **Device-acceptance experience:** `uiautomator dump` suppresses other accessibility services. Screenshot grants bind DSH generation and expire on stop/disconnect/revocation. Store screenshots in app-private Pictures/DSHA, without all-files access. PiP can cover lower controls; automation must check actual visible region/orientation. Screenshots/UI reads must not put sensitive values in public evidence.
 - Register `rikka.shizuku.ShizukuProvider`. Standard uses 13.1.5, Low 12.2.0; do not conceal minSdk 24 with overrideLibrary. Validate manager UID, Binder descriptor, one-shot request, and timeout in callbacks.
-- Built-in `dsh-web-mobile` is 3.3.5 (host 0.2.2 adaptation) at upstream main `646fe837440f9939228bdba0024d407eaac01128` (2026-11-08; release tag v3.3.5 = `14ecfccf5a6acb69e3a84229dee328d31801306f`, plus three post-tag README and plugin-page-host-layout fixes). It **follows upstream**; `tools/apply-mobile-client-patches.mjs` keeps only the host-integration minimum (server auth / safe area / `DSHA_GEAR_FIT_V1`) plus file transfer and locales. Session-input V4, phone search, shortcuts visible-band, font-family row and backdrop press tint were removed; do not reapply them. It is default-enabled again from build336 (device over-the-top acceptance pending).
+- Built-in `dsh-web-mobile` is 3.3.5 at upstream main `646fe837440f9939228bdba0024d407eaac01128`. `tools/apply-mobile-client-patches.mjs` manages local changes. Do not restore withdrawn upstream viewport changes or reapply rc1 navigation patches now owned upstream.
 
 ---
 
 ## Startup contracts
 
-- `welcomed == false` → `OnboardingActivity` (welcome → purpose → grants → done) → `MainActivity`. Main checks `welcomed` before entry; otherwise return to onboarding.
-- Normal execution checks `.offline-extracted` and complete environment identity. Over-the-top updates, an unready environment, unfinished maintenance transactions and unclosed isolated-trial records all open the full-screen runtime maintenance page (`ExtractActivity`), which auto-starts the same candidate at most once; the limited Main is entered only after an explicit choice there, **the limited entry writes no readiness marker**, and Terminal/Web/plugin execution still passes environment gates.
-- **After an over-the-top upgrade, if the installed runtime is not the current candidate, the user must see the full-screen maintenance page with a one-tap update**: `isEnvironmentReady()` (compatible + health receipt) does not mean "nothing to do", and a patch-level update still requires `RuntimeDescriptor.latest`. Auto-start may be blocked by an unresolved Web session, but the entry must not disappear. **Built-in plugins must not depend on whether a host widget exists**; use only their own attributes plus measured geometry. See [over-the-top upgrades and maintenance](docs/en/overwrite-upgrade-and-maintenance.md).
+- `welcomed == false` → `WelcomeActivity` → Start → `MainActivity`. Main checks `welcomed` before entry; otherwise return to Welcome.
+- Normal execution checks `.offline-extracted` and complete environment identity. Maintenance may allow a limited Main for configuration/logs; **it must not forge readiness markers**. Terminal/Web/plugin execution still passes environment gates.
 - Startup failure enters native `StartupRecoveryActivity`; waiting for authentication alone is not failure. The latest five redacted startup records live independently in private storage.
 - Compatibility retry occurs once only after confirmed proroot exit, before authentication, without explicit plugin failure. **Timeout cannot trigger it.**
 - Host `ConfigurationSnapshots` stores each file's content outside rootfs, keeping three healthy and three pre-repair snapshots. A committed old journal must not overwrite later configuration edits.
@@ -173,7 +214,7 @@ Read the [security model](docs/en/security-model.md) first. Essential boundaries
 
 - **Stop uses PID files plus birth identity, not reverse port lookup.** Non-root `/proc/net/tcp` reads may silently be empty, and `/proc` can use hidepid. Startup writes `echo $$ > /root/.dsha-web.pid`, then `exec node`. Stop writes `/root/.dsha-stopped` first so the watchdog exits instead of instantly resurrecting. Check old-PID reuse with kernel `kill(pid,0)` and a second birth-identity check, never force-kill by bare PID/port/name.
 - **SELinux blocks `link(2)` in app-private directories.** proot needs `--link2symlink`; rootfs `.l2s` for `PROOT_L2S_DIR` must bind to the same absolute host path, or dpkg hardlink chown/stat may report missing files.
-- **Two signing keys have different roles:** historical E7E3 signs APKs; a separate keystore signs incremental-update manifests. Never mix them.
+- **Two signing keys have different roles:** release APKs use this fork's release certificate (`814ab103...3622f`, `keystore/release-signing.store`, alias `dsha-release`); a separate keystore signs incremental-update manifests. Never mix them. Changing the APK key would force users to uninstall and lose data.
 - Android `FileInputStream(FileDescriptor)` does not take ownership. Host backups explicitly transfer ownership through ParcelFileDescriptor auto-closing streams.
 - Data maintenance closes PTY/simple terminals before the RuntimeTasks barrier. A proroot terminal verifies/reaps the guest in its own current session; terminating only the launcher cannot release its work lock.
 - Maintenance success text is not readiness proof. Stay on the native page if unready, without automatic navigation loops. Do not represent data-maintenance busy state with general plugin-query/terminal locks.
@@ -182,36 +223,19 @@ Read the [security model](docs/en/security-model.md) first. Essential boundaries
 
 ## Delivery and acceptance
 
-- Changes for the current version are in [CHANGELOG.md](CHANGELOG.md); build and acceptance receipts per version are archived in [docs/releases/](docs/releases/) and `artifacts/`.
-- **External PRs and external merges require a dedicated line-by-line review**: a dedicated AI review session reads the **entire diff** (never samples, never CI-only) and checks security boundaries, missing logic, test coverage, and repository invariants. The only outcomes are APPROVE / REQUEST_CHANGES; a rejection must include `file:line`, the problem, the fix, and P0/P1/P2. Green CI does not mean mergeable; a conflict must be rebased and generated-file differences re-reviewed. The review session must not merge the PR or push the author's branch; merging still requires explicit user approval in the main session. See [the external PR and external merge review process](docs/en/external-pr-review.md).
-- Acceptance scope is stated as measured: local verification is not stretched into "all OS versions, devices or external model services"; Standard / Low and virtual-display capabilities are claimed only against actual device evidence.
-- Signing keys, user data, device screenshots and logs never enter the repository; installs, device operations and releases follow the authorization of that round.
-
-## Parallel session convention
-
-Several sessions often change this repository on the same machine at once. Merging, releasing and cleanup follow each worktree's session declaration; never guess from idle time that a session has finished.
-
-- **One session, one worktree**: start each task with `git worktree add -b <type>/<name> .agents/worktrees/<type>/<name> origin/main`, based on the current `origin/main` (not on a side branch that has not reached main). Do not change code in the main checkout `/root/DSH-A-mod`; use it read-only. `/root/dsha-build` is the `local-ci` sync mirror, not a workspace.
-- **`read` the worktree path before changing a file**: DSH's `fs-observation-policy` only accepts the same absolute path read by the `read` tool in the same session; otherwise `edit` or an overwriting `write` fails with `file has not been read`. Inside a worktree, read and edit `.agents/worktrees/<type>/<name>/...`; reading the same-named file in the main checkout does not count, and neither do shell reads (`cat` / `sed` / `grep`). Re-read after a new session, subagent, takeover or resume. Authorization only checks the version, so a small `read` window with `offset`/`limit` is enough. Re-`read` a file after a shell write before using `edit`.
-- **Declare on creation**: write `.ACTIVE-SESSION` at the worktree root. It is listed in the shared `.git/info/exclude`, so `git add -A` never commits it; do not declare through tracked files such as a design README. Keep the Chinese field keys from [AGENTS.md](AGENTS.md) so every session can read them: `状态` status, `分支` branch and base commit, `会话` full session id, `开始` start (UTC), `更新` last update (UTC), `内容` one-line task, `当前阶段` current stage, `占用文件` files owned, `合并` `不可合并` (not mergeable) or `可合并（已提交 <commit>，…）` (mergeable), `后台任务` background jobs with log and output paths (or `无`).
-- **Update every turn**: refresh `更新`, `当前阶段`, `合并` and `后台任务` before each reply to the user. Waiting for user confirmation or device checks still counts as active.
-- **Hand back when done**: when the task is finished (or abandoned), rename the file to `.SESSION-DONE`, set the status to ended, and state in `合并` whether it may be merged and at which commit; for abandoned work write "abandoned, do not merge".
-- **Merge / release sessions**: merge only worktrees whose `.SESSION-DONE` is marked mergeable. Leave any worktree with `.ACTIVE-SESSION`, or with no declaration, untouched and ask the user. After merging, append one line `已合入 buildNNN（<commit>）` to that `.SESSION-DONE` without changing other fields — **only after the push succeeded and `git merge-base --is-ancestor <commit> origin/main` is true**; while queued, write `待推送 buildNNN（<commit>）`.
-- **List all declarations**: `for f in .agents/worktrees/*/.*SESSION* .agents/worktrees/*/*/.*SESSION* .ACTIVE-SESSION; do [ -f "$f" ] && { echo "== $f"; sed -n '1,10p' "$f"; }; done`
-
-### Shared on-device environment (DSH and every session live in one app process)
-
-- **Run Gradle only through `dsha-gradle`**: the `fcntl` exported by proroot v1.2.8 `libproroot-runtime.so` rewrites every failure to EPERM (lock contention should be EAGAIN). JDK `libnio` uses that symbol, so `FileChannel.tryLock` throws `IOException: Operation not permitted` while another JVM holds the lock and Gradle fails. The source fix lives in `tools/proroot-compat/stack-sysconf.c` (the compat proxy exports a correct `fcntl`) and takes effect once an APK containing it is installed. Inside a worktree use `dsha-gradle <tasks…>`, `dsha-gradle --status` and `dsha-gradle --stop`. It probes `fcntl` at start: unfixed means one global mutex with `--no-daemon`; fixed means up to 3 memory-admitted parallel slots sharing a warm daemon, queueing when memory is short. Gradle JVMs get `oom_score_adj` 900 so the kernel kills builds before dsh. Logs live in `/root/.cache/dsha-gradle-logs/`. Do not run `./gradlew` directly, do not create more `/root/.gradle-<task>` copies (about 1 GB each, plus another 2–3 GB JVM each), and never kill another session's Gradle.
-- **Large git diffs crash under proroot**: on build330 (proroot v1.2.8), `git show --stat`, `git diff --stat` and `--numstat` exit 139 with empty stdout and `[proroot] SIGSEGV` on stderr for some commits or ≥8-path sets; `--name-status` / `--dirstat`, `git log` and ≤7-path chunks do not crash, and GitHub Linux CI is unaffected. Never review or merge from broad `--stat` output, and never let `| head` or `;` swallow the rc. For statistics run `python3 tools/git_guard.py -- <git args>` (fails loud on that signature without retry or partial output); repository tools already use that guard. See [runtime engines](docs/en/runtime-engines.md).
-- **Memory is stability**: concurrent Gradle / Robolectric runs starve the dsh web process and interrupt every session at once. Run one build at a time; run the full unit suite only before merging.
-- **No release-package installs on this device**: installing `io.github.sunsetrne.dsha` stops the whole app (PACKAGE UPDATED) and with it DSH and every session. Sessions must not install or downgrade it; the `io.github.sunsetrne.dsha.test` package is fine. Before the user installs a release package, active sessions update their declarations.
-- **Keep local overrides outside the tree**: disable Conscrypt only through `-I /opt/dsha-x86/local-ci.init.gradle`; do not write temporary files such as `app/src/test/resources/robolectric.properties` into a worktree.
-- **Register long jobs**: background / `nohup` jobs log to a file listed under `后台任务`, with the exit code recorded when done. A DSH restart kills them.
-
-### Interruption and takeover
-
-- After a DSH crash or exhausted balance, leave the worktree and declaration as they are. A taking-over session sets `会话` to its own id and notes `接手 <old id>（reason）`; one owner per worktree at a time.
-- First step after takeover is read-only: `git status`, the tail of each registered job log and its outputs, leftover temporary files. Commands with UNKNOWN outcome (build, push, release dispatch) are checked, **never replayed automatically**; check `origin/main` and existing tags before any push or dispatch.
+- **One release channel only**: this repository's `main` [updates.json](updates.json) plus GitHub
+  Releases (`steveneng2020/DSH-Android`). Do not touch the upstream repository, publish a
+  Release there, or deploy a website. Steps in [UPDATES-HOWTO.md](UPDATES-HOWTO.md).
+- **Mandatory checks** (missing one means the release is not done): package `dsh.android.dev`,
+  certificate `814ab103...3622f` (v1/v2/v3), `debuggable=false`, minSdk 30, arm64-v8a,
+  `versionCode` strictly greater than the published value in `updates.json`, asset/licence/ELF/
+  plugin/emergency gates, and `sha256` and byte size matching the Release asset exactly.
+- **State the acceptance scope honestly**: local verification must not be written up as a full
+  device matrix. Virtual screen, accessibility, vendor ROM behaviour etc. are reported per actual
+  evidence; what was not run is reported as not run.
+- Large generated archives (rootfs / dsh-runtime / ubuntu-tools) are not committed; they are
+  produced during the build with verified digests. Never upload private keys, user data, device
+  screenshots or logs.
 
 ## Coding conventions
 
@@ -231,6 +255,5 @@ Several sessions often change this repository on the same machine at once. Mergi
 | [BUILD](BUILD.en.md) | JDK 17/SDK 37/NDK 26/Python 3.9+, build, signing, publication/delivery |
 | [Security model](docs/en/security-model.md) | Security boundaries and known weaknesses |
 | [Plugins](docs/en/plugins.md) | Plugin installation, packaging contracts, validation scope |
-| [Historical Low guide](docs/android-low.md) | Low compatibility differences: API 23 rebuilds, desugaring, old-system permissions |
 | [Historical releases](docs/releases/) | Release notes and device acceptance, with each artifact's original attribution |
 | [CHANGELOG](CHANGELOG.md) | Complete historical change record |

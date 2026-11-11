@@ -1,16 +1,15 @@
 # Build, validate, and submit
 
-> Current publication identity: `DSH-A-Su` / `io.github.sunsetrne.dsha` / `0.2.1-rc.5-20261110.1700-dsh0.2.2-rc.1` / versionCode 356 / single Standard; the Mod-owned release certificate. Full identity and signing entry points are in [README](README.en.md), [AGENTS](AGENTS.en.md) and [ci/release-identity.json](ci/release-identity.json).
+> **This file covers the fork only** ([steveneng2020/DSH-Android](https://github.com/steveneng2020/DSH-Android)).
+> Upstream [DSH-APP/DSHA](https://github.com/DSH-APP/DSHA) has its own process; do not mix them.
+> Package `dsh.android.dev`, certificate SHA-256 `814ab103...3622f`, not interchangeable with
+> upstream `dsh.android.client` / E7E3.
 
-Read [README](README.en.md), [AGENTS](AGENTS.en.md), [BUILD](BUILD.en.md) and the [documentation index](docs/en/index.md) first. F10–F13 and build190 records describe only their own source, APK, tests and device state at that time; they neither override current requirements nor prove this build.
-
-Current fixed inputs are pinned by [ci/sunset-inputs.lock.json](ci/sunset-inputs.lock.json): public pre-release asset `fixed-inputs-20261105e`, 716,787,167 B, SHA-256 `be97d9f0a45f408d3a7de83ae55a00a85a5154343589571c6d159a0fe58f08f5`, restored by `tools/ci-assets.py`. Large archives and the offline rootfs are not committed; a source-only checkout cannot build a complete APK.
-
-Use the [handoff guide](docs/en/handoff.md) for project-specific operations, the [module map](docs/en/module-map.md) for ownership, and the [engineering standard](docs/en/engineering-standard.md) / [ADR 0001](docs/en/adr/0001-build154-boundaries.md) for constraints. `tools/history` retains retired tools and exact originals only; it does not enter APKs or automatic test execution.
+Read [README](README.en.md), [AGENTS](AGENTS.en.md) and [BUILD](BUILD.en.md) first.
 
 ## Source and tool identity
 
-Use Java 17 and a single `:app` module. There is one Standard variant: system WebView, API 30 minimum, arm64-v8a; package `io.github.sunsetrne.dsha`, test variant `io.github.sunsetrne.dsha.test`. The Low/GeckoView line has been removed, and Android 10 or below is no longer supported.
+Java 17, single `:app` module, pure Java (0 .kt files). Only `standard` ships: minSdk 30, system WebView, arm64-v8a, package `dsh.android.dev`. The `low` flavor (minSdk 23, Gecko) still exists in the tree but was never released and is not a distribution target.
 
 - Application version and fixed filename rules: `app/build.gradle`.
 - DSH version and npm content: `tools/dsh-runtime/package.json`, `package-lock.json`.
@@ -18,17 +17,15 @@ Use Java 17 and a single `:app` module. There is one Standard variant: system We
 - Built-in plugins: `app/src/main/assets/builtin-plugins.json`.
 - Active/specialized/retired runtime patches: `app/src/main/assets/runtime-patches.json`.
 - Independent emergency archives: `tools/recovery-runtime/lock.json`. Updating the main environment must not silently replace this lock.
-- CI tools and Mod release identity: `ci/toolchain.lock.json`, `ci/release-identity.json`.
+- CI tools and historical release certificate: `ci/toolchain.lock.json`, `ci/release-identity.json`.
 
 Normalizable source uses actual LF. Nineteen necessary small binaries and historical originals retain exact bytes. Do not transform line endings in the twelve managed/canonical bytepins listed by `.gitattributes`, rewrite the whole repository, or use newline-insensitive hashes to conceal packaged-content changes. Corresponding scripts generate Java, descriptors, and proofs. Four UUID call sites restore the shared Ids dependency while preserving the historical UUID format.
 
 ## Prepare inputs
 
-The complete Release source ZIP additionally contains original files from `locked-current-build-inputs.zip`, expanded directly into project paths rather than embedding that ZIP. Current fixed inputs are `fixed-inputs-20261105e`, 716,787,167 B, SHA-256 `be97d9f0a45f408d3a7de83ae55a00a85a5154343589571c6d159a0fe58f08f5`, verified by `tools/ci-assets.py --pack` against each SHA. This is not the complete source ZIP's size. After toolchain setup, use the current recipe without a separate bundle. A Git clone supports source-only checks; complete packaging still needs fixed original inputs. APK transformation layers cannot recover the whole original rootfs.
+Historical F8's 999-member Java proof, prior staged reading/style-equivalence proofs, and F7 host-Core rebinding failure/fix positive/negative controls keep their original records. They are not the current adoption scope or test numbers. Old software, APK, and device conclusions belong to their own source/digests; final software and precise APK results are bound by the unified receipt.
 
-The build190 F13 inventory, the older 738,101,893 B input package, and F10/F11 records are historical. They cannot replace the current input identity or transfer old software/device conclusions to this build. Current software, APK and publication results are bound by this CI run and the Release receipt.
-
-Historical F8's 999-member Java proof, prior staged reading/style-equivalence proofs, and F7 host-Core rebinding failure/fix positive/negative controls keep their original records. They are not the current adoption scope or test numbers.
+The APK's approximately 85 MB offline-rootfs is a transformed packaging layer and cannot reconstruct the approximately 304 MB original rootfs. This work provides no “recover all inputs from APK” helper or guarantee. The final complete source ZIP's SHA-256 belongs in the Release body, not the ZIP's own README.
 
 Complete source retains build-required, already tracked, notice/lock-covered small JNI/vendor/interpreter precompiled dependencies. Disclose unknown-source or proprietary limits; this does not make all vendor native code source-reproducible. Describe provenance, licensing, and build paths from actual material. Do not delete required consumer inputs to advertise “pure source.” The retention inventory also includes 27 necessary historical build sources and one website test fixture, without deploying the website.
 
@@ -77,6 +74,7 @@ After complete inputs are ready, run unit tests and Release Lint for the current
 
 ```bash
 ./gradlew :app:testStandardDebugUnitTest :app:lintStandardRelease
+
 python3 tools/verify-stability.py --stage software
 python3 tools/run-host-tests.py --stage runtime
 ```
@@ -87,17 +85,20 @@ A host unable to run AGP/aapt2 may use `tools/run-unit-tests.py` as a pure-logic
 
 ## Release packaging
 
-Explicitly configure `DSHA_KEYSTORE`, `DSHA_KEYSTORE_PASSWORD`, `DSHA_KEY_PASSWORD`, and optionally `DSHA_KEY_ALIAS` (default `dsha-a-su`). Missing passwords no longer fall back to defaults. A release package may only use the Mod certificate recorded in `ci/release-identity.json`; never substitute debug, E7E3 or a temporary certificate.
+Explicitly configure `DSHA_KEYSTORE`, `DSHA_KEYSTORE_PASSWORD`, `DSHA_KEY_PASSWORD`, and optionally `DSHA_KEY_ALIAS`. Missing passwords no longer fall back implicitly. Use only this fork's release certificate (`814ab103...3622f`, alias `dsha-release`); **E7E3 is the upstream certificate and must not be used**, nor debug or temporary CI certificates.
 
 ```bash
 ./gradlew :app:assembleStandardRelease
 ```
 
-Only Standard is published now; the actual package must verify `io.github.sunsetrne.dsha`, versionCode 219, `debuggable=false`, minSdk 30, arm64, assets, licenses, ELF, plugins and the independent emergency gates. Low has been removed; do not build or publish it, and do not claim Android 10 or below support.
+The delivery scope is `standard`. Check the actual package for `dsh.android.dev`, certificate `814ab103...3622f` (v1/v2/v3), `debuggable=false`, minSdk 30, arm64-v8a, assets, licensing, ELF, plugins, and independent emergency gates. Report tests and Release Lint per actual execution; do not claim a fully cold-network build.
 
-Formal CI publication uses [`.github/workflows/release-production.yml`](.github/workflows/release-production.yml): `workflow_dispatch` binds an exact commit, restores fixed inputs from the public pre-release asset, runs complete unit tests / Java formatting / Lint / documentation gates, signs with the repository Secrets certificate, then creates a tag + prerelease and uploads the APK, evidence ZIP, `build-info.json` and `SHA256SUMS`; by default the same run also attaches the co-installable `.debug` / `.dev` test packages and their public test certificate (`test_packages=none` omits them), and `dry_run=true` builds and verifies without creating the tag or Release. See [CI build and release](docs/en/ci-release.md) for parameters and verification.
+All phone operations are paused: no installation, startup, stop, input, conversation, or ADB reconnection for evidence. Historical same-signature upgrade records retain their original APK attribution, not a new APK's. Do not uninstall, clear data, inject faults, or create extra audit APKs.
 
-Do not upload private keys, user data, device screenshots or raw logs; do not install, inject faults or generate extra audit APKs unless that task explicitly authorizes it. Bind the final APK, source commit, attachments and evidence precisely; record selectors, cache/incremental reuse, warnings, skips and unrun scope truthfully. Do not claim publication complete before an actual run, tag and upload result.
+**Publishing** uses only this repository's [`updates.json`](updates.json) plus GitHub
+Releases: upload the APK, update `updates.json` (`versionCode` strictly greater than the
+published value), push `main`. Do not touch the upstream repository, publish there, or
+deploy a website. Do not claim publication before an actual tag/upload result exists.
 
 ## Changes and review
 

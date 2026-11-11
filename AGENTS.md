@@ -1,40 +1,65 @@
 # AGENTS.md
 
+> **本文件面向 AI 与新贡献者**：读完不用扫全库就能上手。先读 [README.md](README.md)。
+>
+> **这是 fork**：[steveneng2020/DSH-Android](https://github.com/steveneng2020/DSH-Android)，
+> 不是上游 [DSH-APP/DSHA](https://github.com/DSH-APP/DSHA)。包名 `dsh.android.dev`、
+> 发布证书 SHA-256 `814ab103…3622f`，与上游 `dsh.android.client` / E7E3 **互不通用**，
+> 不存在覆盖安装关系，数据也不互通（迁移须用备份导出/恢复）。
+> 上游仓库仅作只读参考，本项目不向其提交、不向其发布。
+>
+> **三层版权**（详见 [LICENSE](LICENSE)）：DeepSeek Harness（`deepseek-ai/deepseek-harness`，MIT）
+> → 上游安卓启动器 DSHA（`DSH-APP/DSHA`）→ 本项目（`steveneng2020/DSH-Android`）。
+> 本项目不含模型与 agent 实现，只随包分发 DSH 官方 npm 运行时；对前两层作者均无隶属或背书关系。
 
-> **当前状态**：`0.2.2-20261111.0200-dsh0.2.2-rc.1` / build357 / `dsh.android.client` / DSHA / 单一 Standard。
-> 主线分支 `main`；Android 11+（API 30）/ arm64；proot 默认、proroot 可选；内置 DSH 0.2.2-rc.1。
-> 上岛能力已并入正式包；旧 low/GeckoView 兼容线与独立上岛包已删除；签名使用历史 E7E3 发布证书（见 BUILD.md）。
+## 仓库事实（现行，以代码为准）
 
-DSHA 的 AI / 新贡献者入口。本文让你不扫全库就能上手 —— 读它之前先读 [README.md](README.md)。
+- 形态：Gradle 单模块 `:app`，**纯 Java 17（0 个 .kt）**，arm64-v8a。
+- 应用：包名 `dsh.android.dev`，`standard` flavor（minSdk 30，系统 WebView）。
+  版本号与文件名以 `app/build.gradle` 为准，本文件不另维护一组数字。
+- 内置 DSH：`@deepseek-ai/dsh` **0.2.2-rc.1**，由 `tools/dsh-runtime/package-lock.json` 锁定；
+  `Constants.DSH_VERSION`、`package.json`、锁文件与 `runtime-patches.json` 必须一致
+  （`verifyBundledDshGeneration` 在配置期就拒绝混代）。
+- 运行时：Ubuntu 24.04 arm64 + proot（默认）/ proroot（显式可选），基础环境身份 10。
+- 更新：App 内「检查更新」只读本仓库 `main` 的 [updates.json](updates.json)，
+  APK 由本仓库 Releases 提供；维护规则见 [UPDATES-HOWTO.md](UPDATES-HOWTO.md)。
+- 更新记录三面必须一致：`CHANGELOG.md`（仓库）、`docs/releases/build{code}-changes.{zh,en}.md`
+  → `app/src/main/res/{raw,raw-en}/changelog.md`（全文，生成器守）、
+  `app/src/main/res/{raw,raw-en}/changelog_recent.json`（摘要卡）。
+  漂了就 `python3 tools/check-changelog-sync.py --write`，门禁在 `ci-fast` 与 `verify-stability`。
 
-**仓库事实**：Java 17 / `:app` / arm64；移动 UI 3.3.5；proot 默认 + proroot 可选；固定离线输入由
-`tools/ci-assets.py` 还原。构建、签名与门禁见 [BUILD.md](BUILD.md) 与 [CONTRIBUTING.md](CONTRIBUTING.md)。
+### 构建任务（只有 standard）
 
-维护入口：[文档总索引](docs/documentation-index.md)、[固定构建输入](docs/fixed-build-inputs.md)、[文案长度政策](docs/i18n-length-policy.md)、[项目总手册](docs/project-architecture-handbook.md)、
-[权限](docs/device-permissions-architecture.md)、[环境/数据/插件](docs/runtime-data-plugin-architecture.md)、
-[运行引擎](docs/runtime-engines.md)、[端口](docs/ports-and-networking.md)、[虚拟屏](docs/virtual-screen-architecture.md)、
-[ADR0003](docs/adr/0003-virtual-screen-lifecycle-and-input.md)、[来源依据](docs/references-and-provenance.md)。
+```bash
+python3 tools/run-host-tests.py --stage fast      # 宿主测试
+./gradlew :app:testStandardDebugUnitTest          # 单测
+./gradlew :app:assembleStandardRelease            # 正式包（需发布签名）
+```
 
-**历史记录**：各版本的构建与验收回执保留在 [CHANGELOG.md](CHANGELOG.md) 与 [docs/releases/](docs/releases/)；
-下方目录数量为历史索引，以实际代码为准。
+`low` flavor 仍存在于源码树，但**从未发布**，不作为分发目标；对外文档一律不提它。
 
 ---
 
-## 目录地图（build170历史数量；当前职责导航）
+## 目录地图（2026-11-10 实测数量）
 
 ```
-app/src/main/java/com/deepseekharness/app/
-├── *.java（根包，27 个）      设备与服务层：无障碍、桥、LAN、悬浮条、Shizuku/Root、PTY
-├── ui/      （69 个）         界面：MainActivity + 各 Fragment / Activity / 对话框
-├── core/    （27 个）         编排：HarnessController、维护屏障、备份任务、诊断
-├── runtime/ （18 个）         容器：ProotBootstrap、ContainerRuntime、WebProcessManager、装机
-├── backup/  （62 个）         数据：v5 加密备份、恢复、迁移、格式化、自动备份（最大的包）
-├── vscreen/ （10 个）         独立虚拟屏：通道 / 预览 / 输入 / 无障碍桥
-├── recovery/(4 个)            独立应急 DSH：与正式环境完全分开的生命周期
-├── bridge/  （3 个）          AppBridge 契约、AdbBridge、LAN 访问
-├── data/    （3 个）          KeyVault（Keystore）、便携设置、导出
-└── util/    （118 个）        纯逻辑：不 import 任何 Android API，必须配单测
+app/src/main/java/com/deepseekharness/app/          603 个 .java（main）
+├── *.java（根包，29 个）      设备与服务层：无障碍、桥、LAN、悬浮条、Shizuku/Root、PTY
+├── ui/      （91 个）         界面：MainActivity + 各 Fragment / Activity / 对话框
+├── core/    （47 个）         编排：HarnessController、维护屏障、备份任务、诊断
+├── runtime/ （56 个）         容器：ProotBootstrap、ContainerRuntime、WebProcessManager、装机
+├── backup/  （79 个）         数据：v5 加密备份、恢复、迁移、格式化、自动备份（最大的包）
+├── vscreen/ （27 个）         独立虚拟屏：通道 / 预览 / 输入 / 无障碍桥
+├── recovery/（5 个）          独立应急 DSH：与正式环境完全分开的生命周期
+├── bridge/  （9 个）          AppBridge 契约、AdbBridge、LAN 访问
+├── data/    （4 个）          KeyVault（Keystore）、便携设置、导出
+├── device/ diagnostics/ screen/ capabilities/ skills/   共 23 个（设备审计与诊断、屏幕、能力探测）
+└── util/    （233 个）        纯逻辑：不 import 任何 Android API，必须配单测
+
+全线共 1072 个 .java（含 test 389、androidTest 10、debug 39、deviceAudit 21）
 ```
+
+数量是导航线索，不是契约；`util/` 里放了 233 个纯逻辑类，改动前先确认既有类没有同名职责。
 
 ### 根包（`com.deepseekharness.app`）——设备与系统服务
 
@@ -60,7 +85,7 @@ Root 维护以 [权限架构](docs/device-permissions-architecture.md) 与 [固�
 
 | 层 | 关键类 | 职责 |
 |---|---|---|
-| `ui/` | MainActivity / OnboardingActivity / ExtractActivity（维护详情） / Launch·Config·Settings·Plugin·Workspace Fragment / WebPreviewActivity | 界面与启动门禁；首次部署在引导内后台进行并以部署胶囊显示；覆盖更新进入整屏维护页 |
+| `ui/` | MainActivity / WelcomeActivity / Launch·Config·Settings·Plugin·Workspace Fragment / WebPreviewActivity | 界面与启动门禁 |
 | `core/` | `HarnessController`（约 57 KB，编排核心） | 启动 / 停止 dsh、鉴权链接捕获；**不要再往里塞新职责**，新逻辑写成独立协作者 |
 | `core/` | `ConfigStore` | 配置唯一读写入口（端口 / 模型 / workdir / API key） |
 | `core/` | `InstallRepository` / `MaintenanceCoordinator` / `RuntimeTasks` / `StartupDiagnostics` | 安装状态、维护屏障、运行任务锁、启动诊断 |
@@ -75,14 +100,17 @@ Root 维护以 [权限架构](docs/device-permissions-architecture.md) 与 [固�
 
 ---
 
-## 测试布局（build170历史快照）
+## 测试布局（2026-11-10 实测）
 
-下列数量仅描述基座历史分布；F13实际选择类/XML、失败/错误/跳过与最终软件结果以[F13记录](docs/releases/v0.2.1-rc.2-build190-fix13-20261021.md)及统一回执为准，不从静态文件数推导执行数。
+`app/src/test/java/com/deepseekharness/app/` 共 **389** 个测试类，分布：
+`util/` 213、`backup/` 54、`core/` 35、`runtime/` 30、`vscreen/` 28、`ui/` 14、
+`data/` 2、`recovery/` 2、`bridge/` `capabilities/` `screen/` `skills/` 各 1、根包 1。
 
-`app/src/test/java/com/deepseekharness/app/` 共 172 个测试类，分布：`util/` 112、`backup/` 45、`core/` 6、`runtime/` 6、`vscreen/` 1、`ui/` 1、根包 1（`LanAuthTest`）。
+**静态类数不等于执行数**，也不要拿本表当通过证据——实际通过/失败/跳过以当次
+JUnit XML 与 [docs/releases/](docs/releases/) 的回执为准。
 
 ```bash
-bash build.sh :app:testStandardDebugUnitTest   # 全量单测
+./gradlew :app:testStandardDebugUnitTest   # 全量单测（standard）
 ```
 
 锁定的不变式（重构时绝不能改坏）：
@@ -113,8 +141,8 @@ bash build.sh :app:testStandardDebugUnitTest   # 全量单测
 
 ### 版本与构建
 
-- **当前身份以 `app/build.gradle`、`ci/release-identity.json` 与 [CHANGELOG.md](CHANGELOG.md) 为准**：build356 / DSHA 修订 `0.2.2-rc.1`（内置 DSH 0.2.2-rc.1）/ `dsh.android.client` / DSHA / 单一 Standard；`-Pdsha.identity=upstream`（默认）为官方发行身份，`mod`（`io.github.sunsetrne.dsha` / Mod 证书）仅保留用于历史包与共存验证。
-- `standard`：minSdk 30（Android 11+），系统 WebView，arm64-v8a，是唯一构建线，任务为 `assembleStandardRelease`。`low`/GeckoView 兼容线已整体删除（含 `assembleLowRelease`、legacy proot/loader），**不再声明 Android 10 及以下可用**；测试变体通过 `-Pdsha.sunsetTest=true`（`.test`）、`-Pdsha.debugPackage=true`（`.debug`，debuggable 的 debug 构建）或 `-Pdsha.devPackage=true`（`.dev`，release 构建）生成，三者互斥，且必须用 `-Pdsha.unsignedPackage=true` 由测试证书签名。
+- **版本与签名身份以 `app/build.gradle` 与 `ci/release-identity.json` 为准**：包名 `dsh.android.dev`，证书 SHA-256 `814ab103…3622f`。E7E3 是**上游** `dsh.android.client` 期用的调试证书，与本 fork 无关，本项目任何包都不得用它签名。
+- `standard`：minSdk 30，系统 WebView，构建任务 `assembleStandardRelease`。源码树里还留着 `low` flavor（minSdk 23，带 GeckoView 143）与 `tools/build-low-proot.py`，但**该版本从未发布**，不是分发目标；对外文档不描述它，`docs/android-low.md` 属上游历史材料。
 - 离线 rootfs（`assets/offline-rootfs.bin`）**不提交**，由准备脚本生成；APK 用 `offline-rootfs.layout=split-runtime-v1` 标记 Ubuntu 与 `dsh-runtime.bin` 分包，构建核验两份摘要。
 - 新 dsh 依赖由 `tools/dsh-runtime/package-lock.json` 锁定；`tools/prepare-runtime-descriptor.py` 生成独立受管契约描述，APK 版本仅作诊断来源。相同基础版本更新受管树，个人数据保持原位；**不因 UI-only APK 更新替换环境，不因普通 dsh 更新递增 Ubuntu 基础环境版本**。
 - 离线 curl / git / 证书由 `tools/ubuntu-tools/packages.lock.json` 锁定（`tools/prepare-ubuntu-tools.py` 生成 `ubuntu-tools.bin`）；网页 ES 兼容依赖锁在 `tools/web-compat/`（`node tools/prepare-web-compat.mjs`）。生成文件不提交，构建核验摘要。
@@ -157,15 +185,14 @@ bash build.sh :app:testStandardDebugUnitTest   # 全量单测
 - **麦克风**：清单同时声明 `RECORD_AUDIO` 与 `MODIFY_AUDIO_SETTINGS`；由 `BrowserMicrophone` 按网页请求申请，不能在普通启动时预授权；只放行当前本机页面的纯音频请求，摄像头 / 屏幕音频拒绝；旧回调不能批准新页。
 - **设备验收经验**：`uiautomator dump` 会抑制其他无障碍服务；截图授权绑定 DSH generation，停止 / 断连 / 撤销后失效；截图存应用私有 Pictures/DSHA，无需所有文件访问；PiP 可能盖住底部控件，自动化必须核对实际可见区域与屏幕方向；截图 / 读屏不可将敏感值写入公开取证文件。
 - Shizuku 必须注册 `rikka.shizuku.ShizukuProvider`；标准版 13.1.5 / 兼容版 12.2.0（不用 overrideLibrary 掩盖 minSdk 24）。回调严格核对管理器 UID、Binder 描述符、单次请求与超时。
-- 内置移动插件 `dsh-web-mobile` 为 3.3.5（适配宿主 0.2.2），固定上游 main `646fe837440f9939228bdba0024d407eaac01128`（2026-11-08；发布标签 v3.3.5 = `14ecfccf5a6acb69e3a84229dee328d31801306f`，标签后还有 README 与插件页交还宿主排版 3 个修复提交）；**完全追随上游**，`tools/apply-mobile-client-patches.mjs` 只保留宿主集成必需的最小集（服务端鉴权 / 安全区 / `DSHA_GEAR_FIT_V1`）与文件传输、多语言；会话输入 V4、手机搜索、快捷键弹层可见带、字体族行、遮罩按压染色等 UI/行为补丁已删除，不要重新套回；build336 起默认启用（真机覆盖升级验收待补）。
+- 内置移动插件 `dsh-web-mobile` 为 3.3.5，固定上游 main `646fe837440f9939228bdba0024d407eaac01128`；`tools/apply-mobile-client-patches.mjs` 管理本地差异，不恢复上游已撤回的视口改动；上游已接管的 rc1 导航补丁不要重新套回。
 
 ---
 
 ## 启动契约（不可破坏）
 
-- `welcomed == false` → `OnboardingActivity`（欢迎 → 用途 → 授权 → 完成）→ `MainActivity`；`MainActivity` 进入前校验 `welcomed`，否则永远回引导。
-- 正常运行检查 `.offline-extracted` 与完整环境身份。覆盖更新、环境未就绪、未完成维护事务或未关闭的隔离试运行现场，都整屏进入运行环境维护页（`ExtractActivity`），同一候选只自动尝试一次；用户在维护页显式选择后才进入受限主界面，**受限入口不写就绪标记**，终端、Web 与插件执行仍须通过环境门禁。
-- **覆盖安装后只要已装运行时不是当前候选，就必须让用户看到整屏维护页并可一键更新**：`isEnvironmentReady()`（兼容 + 健康回执）不等于「无事可做」，补丁级更新也须按 `RuntimeDescriptor.latest` 进维护；自动开始可以因未关闭的 Web 会话被拦，但入口不能消失。**客户端插件不得依赖宿主某个控件是否存在**，只能用自有属性 + 实测几何。详见[覆盖升级与维护门禁](docs/overwrite-upgrade-and-maintenance.md)。
+- `welcomed == false` → `WelcomeActivity` → 点开始 → `MainActivity`；`MainActivity` 进入前校验 `welcomed`，否则永远回 Welcome。
+- 正常运行检查 `.offline-extracted` 与完整环境身份。维护页允许进入受限主界面查看配置和日志；**此入口不能伪造就绪标记**，终端、Web 与插件执行仍须通过环境门禁。
 - 启动失败自动进入原生 `StartupRecoveryActivity`；等待鉴权本身不是故障。最近五次脱敏启动记录独立保存在私有目录。
 - 兼容重试仅在 proroot 已确认退出、鉴权前且无明确插件故障时进行一次，**不能由超时触发**。
 - 配置快照由宿主 `ConfigurationSnapshots` 执行：正文逐文件存于 rootfs 外，保留三份健康与三份修复前快照；旧日志已提交后不得覆盖后来修改的配置。
@@ -178,7 +205,7 @@ bash build.sh :app:testStandardDebugUnitTest   # 全量单测
 
 - **停止靠 pid 文件 + 出生身份，不靠端口反查**：`/proc/net/tcp` 非 root 读不到（静默空），`/proc` 有 hidepid。启动时 `echo $$ > /root/.dsha-web.pid` 再 `exec node`；停止先写哨兵 `/root/.dsha-stopped`（看门狗见到就退出，否则「秒复活」）。旧 PID 复用按内核 `kill(pid,0)` + 出生身份二次核验，不得按裸 PID / 端口 / 名称强杀。
 - **app 私有目录禁 `link(2)`**（SELinux）：proot 必须带 `--link2symlink`；`PROOT_L2S_DIR` 在 rootfs 内的 `.l2s` 必须绑定到相同宿主绝对路径，否则 dpkg 安装对硬链接 chown/stat 会报文件不存在。
-- **签名身份分开管理**：官方正式 APK 用历史 E7E3 发布证书（`ci/release-identity.upstream.json`，由 `verifyPublishCertificate` 强制核对），覆盖升级沿用原包名 `dsh.android.client`；Mod 包 `io.github.sunsetrne.dsha` 的 A4B0 证书只服务历史共存包，增量更新清单若启用则用独立 keystore，绝不混用。
+- **两把签名钥匙各管一件事**：线上 APK 用本 fork 发布证书（`814ab103…3622f`，`keystore/release-signing.store`，alias `dsha-release`），增量更新清单用独立 keystore，绝不混用。换钥 = 逼用户卸载重装丢数据。
 - Android 的 `FileInputStream(FileDescriptor)` 不接管传入描述符：宿主备份通过 `ParcelFileDescriptor` 自动关闭流明确转移所有权。
 - 数据维护先关闭 PTY 与简易终端再取 `RuntimeTasks` 屏障；proroot 终端按本次独立会话核验并回收 guest，不能只结束启动器就释放工作锁。
 - 维护成功文案不能代替就绪检查；未就绪时留在原生页，不自动跳回循环。维护页忙状态不使用插件查询 / 终端等通用锁冒充数据维护。
@@ -187,57 +214,15 @@ bash build.sh :app:testStandardDebugUnitTest   # 全量单测
 
 ## 交付与验收
 
-- 当前版本的改动见 [CHANGELOG.md](CHANGELOG.md)；各版本的构建、验收与回执归档在 [docs/releases/](docs/releases/) 与 `artifacts/`。
-- **外部 PR / 外部合并必须专职逐行审查**：由专门的 AI 审查会话审阅**全部 diff**（不得抽样、不得只看 CI），逐项检查安全边界、逻辑缺失、测试覆盖与仓库不变式；结论只有 APPROVE / REQUEST_CHANGES，打回意见必须带 `file:line`、问题、修法、P0/P1/P2。CI 全绿不等于可合并；冲突必须 rebase 后重看生成文件差异；审查会话不得合并 PR 或 push 作者分支，合并仍需用户在主会话明确同意。流程见[外部 PR 与外部合并审查流程](docs/external-pr-review.md)。
-- 验收范围如实声明：不把本机验证扩写成全部系统版本、机型或外部模型服务矩阵；单一 Standard 与虚拟屏能力按实际设备证据声明，Android 10 及以下不在支持范围。
-- 私钥、用户数据、设备截图与日志不进入仓库；安装、设备操作与发布按当次授权执行。
-
-## 多会话并行约定
-
-同一台机器上常有多个会话同时改本仓库。合并、发布、清理以「活跃声明」为准，不按空闲时长猜测会话是否结束。
-
-- **一会话一工作树**：新任务用 `git worktree add -b <type>/<name> .agents/worktrees/<type>/<name> origin/main` 建独立分支，基线取当时的 `origin/main`（不要基于未进 main 的侧分支）。不在主检出 `/root/DSH-A-mod` 上改代码；主检出只做只读查看。`/root/dsha-build` 是 `local-ci` 的同步镜像，不是工作区。
-- **改文件前用 `read` 读工作树路径**：DSH 的 `fs-observation-policy` 只认同一会话里 `read` 工具读过的同一绝对路径，否则 `edit` / 覆盖 `write` 报 `file has not been read`。在工作树里改文件，读和改都用 `.agents/worktrees/<type>/<name>/...`，读主检出的同名文件不算；`cat` / `sed` / `grep` 等 shell 读取不算；新会话、subagent、接手或 resume 后要重新读。授权只看版本，`read` 带 `offset`/`limit` 读一小段即可。shell 写过的文件要重新 `read` 后再 `edit`。
-- **建树即声明**：在工作树根目录写 `.ACTIVE-SESSION`。该文件已列入共享的 `.git/info/exclude`，不会被 `git add -A` 带进提交；不要改用设计 README 等会进仓库的文件做声明。字段：
-
-  ```text
-  状态：活跃（请勿合并 / 删除 / 重置本分支与工作树）
-  分支：<branch>（基于 <commit> <说明>）
-  会话：<完整 session id>
-  开始：<UTC 时间>
-  更新：<UTC 时间>
-  内容：<一句话任务>
-  当前阶段：<进行中 / 待用户确认 / 待真机核对 …>
-  占用文件：<会改动的文件或目录>
-  合并：不可合并 | 可合并（已提交 <commit>，建议版本说明 <一句话>）
-  后台任务：无 | <命令摘要> → 日志 <路径>，产物 <路径>
-  ```
-- **每轮结束更新**：每次回复用户前改「更新」「当前阶段」「合并」「后台任务」四项。等待用户确认、待真机核对仍算活跃。
-- **结束即交还**：任务完成（或放弃）后把文件改名为 `.SESSION-DONE`，状态写「已结束」，「合并」写明是否可合并及提交号；放弃时写「放弃，勿合并」。
-- **合并 / 发布会话**：只合并有 `.SESSION-DONE` 且「合并」为可合并的工作树；`.ACTIVE-SESSION` 或没有任何声明的工作树一律不动，先问用户。合并后在对方 `.SESSION-DONE` 末尾追加一行「已合入 buildNNN（<commit>）」，不改其它字段。**这一行只在推送成功、`git merge-base --is-ancestor <commit> origin/main` 为真之后写**；排队待推的写「待推送 buildNNN（<commit>）」。
-- **查看全部声明**：`for f in .agents/worktrees/*/.*SESSION* .agents/worktrees/*/*/.*SESSION* .ACTIVE-SESSION; do [ -f "$f" ] && { echo "== $f"; sed -n '1,10p' "$f"; }; done`
-
-### 本机共享环境（DSH 与所有会话同在一个 App 进程里）
-
-- **Gradle 只走 `dsha-gradle`**：proroot v1.2.8 的 `libproroot-runtime.so` 导出的 `fcntl` 把所有失败改写成 EPERM（抢锁失败本应 EAGAIN）。JDK `libnio` 用这个符号，另一个 JVM 持锁时 `FileChannel.tryLock` 抛 `IOException: Operation not permitted`，Gradle 直接失败。源码修复在 `tools/proroot-compat/stack-sysconf.c`（兼容层导出正确的 `fcntl`），装上含修复的 APK 才生效。本机在工作树内一律用：
-
-  ```bash
-  dsha-gradle :app:testStandardDebugUnitTest --tests '*XxxTest'   # 共用 /root/.gradle、--offline、固定 aapt2/Robolectric/JDK17
-  dsha-gradle --status                                            # 模式、槽位、谁在占用、日志在哪
-  dsha-gradle --stop                                              # 空闲时停掉常驻 daemon
-  ```
-
-  它启动时实测 `fcntl`：未修复时全局互斥、`--no-daemon`；已修复时按可用内存开最多 3 个并发槽位并复用常驻 daemon，内存不够就排队。Gradle JVM 的 `oom_score_adj` 设为 900，内存吃紧时先杀构建、不先杀 dsh。日志在 `/root/.cache/dsha-gradle-logs/`。不要直接跑 `./gradlew`，不要再建 `/root/.gradle-<任务>` 副本绕锁（每份约 1 GB，并多起一个 2–3 GB 堆的 JVM），不要杀别的会话的 Gradle 进程。
-- **proroot 下 git 大 diff 会 SIGSEGV**：build330（proroot v1.2.8）实测 `git show --stat`、`git diff --stat` / `--numstat` 对某些提交或 ≥8 路径组合 exit 139、stdout 0 字节、stderr 为 `[proroot] SIGSEGV`；`--name-status` / `--dirstat`、`git log` 与拆成 ≤7 路径的分片不崩，GitHub Linux CI 不受影响。审查 / 合入不要用 `--stat` 大范围输出，也不要让 `| head` 或 `;` 吞掉 rc；需要统计时用 `python3 tools/git_guard.py -- <git 参数>`（命中签名立即报错、不重试、不返回部分输出），仓库工具已统一走该封装。细节见[运行引擎](docs/runtime-engines.md)。
-- **内存即稳定性**：并发 Gradle / Robolectric 抢内存会把 dsh web 一起拖死，所有会话同时中断。一次只跑一个构建；全量单测只在合并前跑，日常跑定向 `--tests`。
-- **不在本机覆盖安装正式包**：安装 `io.github.sunsetrne.dsha` 会被系统以 PACKAGE UPDATED 结束整个 App，DSH 与全部会话随之中断。会话不得自行安装或降级正式包；测试包 `io.github.sunsetrne.dsha.test` / `.debug` / `.dev` 可装。用户要装正式包时，先让各活跃会话更新声明。
-- **本机专用覆盖放仓库外**：Conscrypt 关闭等只走 `-I /opt/dsha-x86/local-ci.init.gradle`，不往工作树写 `app/src/test/resources/robolectric.properties` 这类临时文件（已被忽略的 `local.properties` 除外），中断后才不会留下会被提交的残留。
-- **长任务写进声明**：后台 / `nohup` 任务必须输出到日志文件并登记在「后台任务」，结束时写明退出码。DSH 重启会杀掉这些任务。
-
-### 中断与接手
-
-- DSH 闪退或余额耗尽后，原会话的工作树和声明保持原样。新会话接手时把「会话」改为自己的 id，并注明「接手 <原 id>（原因）」；同一工作树同时只有一个持有者。
-- 接手第一步只读核对：`git status`、「后台任务」日志末尾与产物、临时文件残留。结果为 UNKNOWN 的命令（构建、推送、发布 dispatch）先核对实际状态，**不自动重放**；推送 / dispatch 前先查 `origin/main` 与已有 tag。
+- **发布通道只有一条**：本仓库 `main` 的 [updates.json](updates.json) + GitHub Releases（`steveneng2020/DSH-Android`）。
+  不改上游仓库、不向其发 Release、不部署官网。发布步骤见 [UPDATES-HOWTO.md](UPDATES-HOWTO.md)。
+- **必查项**（缺一项就不算发布完成）：包名 `dsh.android.dev`、证书 `814ab103…3622f`（v1/v2/v3）、
+  `debuggable=false`、minSdk 30、arm64-v8a、`versionCode` 严格大于 `updates.json` 里的已发布值、
+  资产/许可/ELF/插件与独立应急门禁、`sha256` 与字节数与 Release 附件逐字节一致。
+- **验收范围如实声明**：本机验证不得扩写成「全部设备矩阵通过」。虚拟屏、无障碍、厂商 ROM
+  等按实际设备证据逐条写，没跑就写没跑。
+- 大生成归档（rootfs / dsh-runtime / ubuntu-tools）不入 Git，构建现场生成并核验摘要；
+  私钥、用户数据、设备截图与日志不上传。
 
 ## 编码约定
 
