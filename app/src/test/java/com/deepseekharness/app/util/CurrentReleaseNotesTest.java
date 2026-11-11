@@ -6,7 +6,7 @@ import org.junit.Test;
 
 public final class CurrentReleaseNotesTest {
   private static final String VERSION = "0.2.1-rc.3-20261024.0345-dsh0.2.1-rc.3";
-  private static final String NOTES = "# DSHA " + VERSION + " / build194\n\nCurrent fixes";
+  private static final String NOTES = "# DSHA " + VERSION + "・ build194\n\nCurrent fixes";
 
   @Test
   public void subtitleUsesTheInstalledReleaseVersionWithoutTheDiagnosticTimestamp() {
@@ -20,7 +20,7 @@ public final class CurrentReleaseNotesTest {
   @Test
   public void actualCurrentBodyAndInstalledIdentityAppearTogether() {
     assertEquals(
-        "DSHA " + VERSION + " / build194\n\nCurrent fixes",
+        "DSHA " + VERSION + "・ build194\n\nCurrent fixes",
         CurrentReleaseNotes.render(VERSION, 194, NOTES, false));
   }
 
@@ -51,7 +51,7 @@ public final class CurrentReleaseNotesTest {
               "本安装包未附当前版本的更新说明。",
               "This installation does not include release notes for the current build.");
       assertEquals(
-          "DSHA " + VERSION + " / build194\n\n" + fallback,
+          "DSHA " + VERSION + "・ build194\n\n" + fallback,
           CurrentReleaseNotes.render(VERSION, 194, null, language));
       assertTrue(
           CurrentReleaseNotes.render(VERSION, 194, NOTES, language).endsWith("Current fixes"));

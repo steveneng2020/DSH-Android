@@ -95,7 +95,14 @@ def main():
         if not m:
             problems.append('VersionSeparator 里找不到 GLYPH 常量')
         else:
-            decoded = m.group(1).encode().decode('unicode_escape')
+            raw = m.group(1)
+            # 两种写法都要认：真字符 与 Java 的 \uXXXX 转义。
+            # 2026-11-12 踩到：原先无条件走 unicode_escape，源码里写的是真字符时
+            # 会被当成 latin-1 解成 U+00E3（UTF-8 首字节），门禁自己报错。
+            if '\\u' in raw:
+                decoded = raw.encode().decode('unicode_escape')
+            else:
+                decoded = raw
             if decoded != GLYPH:
                 problems.append('VersionSeparator.GLYPH 是 U+%04X，期望 U+30FB「・」'
                                 % (ord(decoded[0]) if decoded else 0))

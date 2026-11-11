@@ -19,8 +19,10 @@ def build_identity(root):
 
 def update(root, check=False):
     code, version = build_identity(root)
-    # fork：标题分隔符统一用 '.'（与 App 内 '·' 以外的所有位置保持一致），不再用 '/'。
-    heading = f'# DSHA {version}. build{code}'
+    # fork：标题分隔符统一用全角中点 '・'（U+30FB），与 App 内版本行一致。
+    # 2026-11-12 用户指出「本版本更新记录」弹窗标题里 build 前是个句号，与别处不一致。
+    # 历史：最早是 '/'，后来改成 '.'，都不对；'・' 才是全局统一口径。
+    heading = f'# DSHA {version}・ build{code}'
     for locale in LANGUAGES:
         folder = RESOURCE_FOLDERS[locale].replace('values', 'raw', 1)
         source = root / f'docs/releases/build{code}-changes.{locale}.md'

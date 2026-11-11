@@ -244,11 +244,12 @@ public final class UpdateActivity extends AppCompatActivity {
               clipboard.setPrimaryClip(
                   android.content.ClipData.newPlainText(
                       "DSHA",
-                      BuildConfig.VERSION_NAME
-                          + " • build"
-                          + BuildConfig.VERSION_CODE
-                          + " • DSH "
-                          + com.deepseekharness.app.util.Constants.DSH_VERSION));
+                      // 复制出去的文本必须与界面看到的一致，否则用户拿它去比对版本会困惑。
+                      com.deepseekharness.app.util.VersionSeparator.plain(
+                              com.deepseekharness.app.util.VersionSeparator.plain(
+                                  BuildConfig.VERSION_NAME,
+                                  "build" + BuildConfig.VERSION_CODE),
+                              "DSH " + com.deepseekharness.app.util.Constants.DSH_VERSION)));
               Toast.makeText(
                       this, com.deepseekharness.app.util.UiText.text("已复制版本信息"), Toast.LENGTH_SHORT)
                   .show();

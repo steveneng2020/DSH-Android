@@ -35,10 +35,10 @@ public final class VersionSeparator {
    * <p><b>改这个字符之前先跑 {@code tools/check-version-separator.py}</b>，
    * 它会检查全仓是否统一，以及是否还有别处硬编码旧字符。
    */
-  public static final String GLYPH = "\u30fb";
+  public static final String GLYPH = "・";
 
   /** 分隔符两侧是否加空格。全角字符本身占位较宽，加单空格在窄屏上会显得松散。 */
-  private static final boolean PADDED = false;
+  private static final boolean PADDED = true;
 
   private VersionSeparator() {}
 

@@ -1,4 +1,4 @@
-# DSHA v1.4 20261111@0.2.2-rc.1. build20050357
+# DSHA v1.4 20261111@0.2.2-rc.1・ build20050357
 
 Esta compilação foi reconstruída sobre o upstream DSHA 0.2.2 (upstream build357), com DSH 0.2.2-rc.1 na base Ubuntu 10.
 
