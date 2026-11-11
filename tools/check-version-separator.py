@@ -107,6 +107,16 @@ def main():
                 problems.append('VersionSeparator.GLYPH 是 U+%04X，期望 U+30FB「・」'
                                 % (ord(decoded[0]) if decoded else 0))
         # 只看代码行，注释里提到这些词是允许的（本文件头就在解释为什么放弃它们）
+        # ④ GLYPH 不能是「转义文本」而非字符。
+        # 2026-11-12 事故：源码写双反斜杠 u30fb，Java 编译成 6 个 ASCII 字符，
+        # dex 里根本没有 U+30FB。编译通过、源码看着对、连本门禁都放过，只有真机暴露。
+        raw_glyph = re.search(r'GLYPH\s*=\s*"([^"]*)"', src)
+        if raw_glyph and '\\' in raw_glyph.group(1):
+            problems.append(
+                'VersionSeparator.GLYPH 含反斜杠（%r）—— 本意是字符时应直接写字符本身。'
+                '写成转义文本会被编译成字面量，dex 里不是那个字符（MEMORY §4 第 59 条）'
+                % raw_glyph.group(1))
+
         code_lines = [ln for ln in src.split('\n')
                       if not ln.lstrip().startswith(('//', '*', '/*'))]
         code = '\n'.join(code_lines)
