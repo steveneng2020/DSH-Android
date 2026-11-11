@@ -468,6 +468,7 @@ public final class VirtualScreenManager {
     }
     if (discardObserved) semantics.clearObserved();
     if (rejection != null) recordFrameRejection(rejection);
+    else clearFrameRejections();
     return value;
   }
 
@@ -488,6 +489,22 @@ public final class VirtualScreenManager {
   /** 同一 (route, reason) 的连续拒绝只记一条，且至少间隔 10 秒 —— 有界日志不能被常态拒绝刷掉。 */
   private static final long FRAME_REJECTION_INTERVAL_MS = 10_000;
 
+  /**
+   * 连续帧门拒绝次数。达到 {@link #FRAME_REBUILD_THRESHOLD} 就要求重建会话。
+   *
+   * <p>动机：帧门按 frameSeq 拒绝过期输入，偶尔拒绝是正常的（用户手速快于帧率）。
+   * 但**连续**拒绝说明会话的帧序号已经与实际画面脱节 —— 常见于 Web 侧重建了渲染层
+   * 而宿主还拿着旧会话。这时继续在原会话上发指令，用户会看到「点了没反应」。
+   * 计数达到阈值就丢会话重建，比让用户自己想到「重启」要好。
+   */
+  private int consecutiveFrameRejections;
+
+  /** 置位后下一次 {@code startOrdered} 先丢弃旧会话再新建。 */
+  private volatile boolean requirementsRebuild;
+
+  /** 连续拒绝达到这个次数就判定会话需要重建。3 次是「排除偶发手速」与「不让用户反复点」的折中。 */
+  private static final int FRAME_REBUILD_THRESHOLD = 3;
+
   private final Object REJECTION_LOG = new Object();
   private String lastFrameRejection = "";
   private long lastFrameRejectionAt;
@@ -506,6 +523,34 @@ public final class VirtualScreenManager {
       lastFrameRejectionAt = now;
     }
     recordDiagnostic("VSCREEN_INPUT_REJECTED", detail);
+    noteFrameRejection();
+  }
+
+  /**
+   * 记一次连续帧拒绝；达阈值则要求重建会话。
+   *
+   * <p>与 {@link #recordFrameRejection} 的分工：那个负责**记日志**（有 10 秒节流，
+   * 防常态拒绝刷掉日志），本方法负责**计数与决策**（每次都数，不受节流影响）。
+   * 合成一个方法会让节流把计数也吞掉，3 次阈值永远到不了。
+   */
+  private void noteFrameRejection() {
+    synchronized (LOCK) {
+      consecutiveFrameRejections++;
+      if (consecutiveFrameRejections < FRAME_REBUILD_THRESHOLD) return;
+      // 正在清理或启动中不置位：那两个状态下本来就没人能消费这个标志，
+      // 置了反而会在下一次真正 start 时误伤一个健康会话。
+      if (lifecycleState.cleanupPending() || lifecycleState == VirtualScreenLifecycleState.STARTING)
+        return;
+      requirementsRebuild = true;
+      recordDiagnostic("VSCREEN_SESSION_REBUILD_REQUIRED", "consecutiveRejections=" + FRAME_REBUILD_THRESHOLD);
+    }
+  }
+
+  /** 帧门放行过一次，说明会话健康，计数归零。 */
+  private void clearFrameRejections() {
+    synchronized (LOCK) {
+      consecutiveFrameRejections = 0;
+    }
   }
 
   /** 诊断记录会写文件，一律交给 WORKER：绝不占住 ACTIONS 串行通道，也不在 LOCK 里落盘。 */
@@ -728,6 +773,18 @@ public final class VirtualScreenManager {
     // 只传白名单 id 与方向：Core 再按白名单解析一次，未知 id/超预算规格回退默认。
     String createQuery = "preset=" + encode(preset.id) + "&orientation=" + encode(orientation);
     Snapshot existing = snapshot(null, scope);
+    if (requirementsRebuild && existing != null) {
+      // 连续帧拒绝已判定会话脱节：不要复用，先拆掉再走新建路径。
+      // 不清这个标志会让每次 start 都重建，变成死循环。
+      requirementsRebuild = false;
+      consecutiveFrameRejections = 0;
+      try {
+        perform(existing, "/vscreen/destroy", "", true);
+      } catch (RuntimeException ignored) {
+        // 拆不掉也要继续新建：留着旧会话只会让下一次拒绝再来一轮。
+      }
+      existing = null;
+    }
     if (existing != null) {
       JSONObject result = perform(existing, "/vscreen/create", createQuery, true);
       if (result.optBoolean("ok")) visuals.present();

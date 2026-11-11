@@ -105,6 +105,26 @@ public class PluginFragment extends Fragment {
     return current != null && current.catalog != null && current.catalog.safeMode;
   }
 
+  /**
+   * 安全模式下拒绝安装 / 启用插件。
+   *
+   * <p><b>为什么需要这个方法</b>：2026-11-12 与上游 0.2.2-rc.1 逐行比对确认，
+   * {@code installLink()} 与 {@code toggle()} 都**不检查**安全模式 —— 安全模式只影响
+   * 界面横幅（{@code pluginSafeBanner}）与恢复按钮显隐，实际仍能装/启插件。
+   * 安全模式的语义是「隔离可疑插件、只用核心跑起来」，能继续装新插件就失去意义了。
+   *
+   * <p>只拦「安装」与「启用」，不拦「禁用」与「卸载」—— 安全模式下用户本就该能卸载
+   * 出问题的插件。所以调用方要按动作方向传 {@code enabling}。
+   */
+  private boolean safeModeBlocks(boolean enabling) {
+    if (!safeModeActive() || !enabling) return false;
+    toast(
+        com.deepseekharness.app.util.UiText.choose(
+            "安全模式下不能安装或启用新插件；请先退出安全模式。",
+            "Safe mode blocks installing or enabling plugins. Exit safe mode first."));
+    return true;
+  }
+
   void syncInstalledState() {
     repository.ensureLoaded();
   }
@@ -679,6 +699,7 @@ public class PluginFragment extends Fragment {
   }
 
   private void installLink() {
+    if (safeModeBlocks(true)) return;
     try {
       PluginSource source = PluginSource.parse(linkInput.getText().toString());
       android.view.inputmethod.InputMethodManager keyboard =
@@ -1074,6 +1095,7 @@ public class PluginFragment extends Fragment {
   }
 
   private void toggle(PluginRepository.Item item, boolean enabled) {
+    if (safeModeBlocks(enabled)) return;
     if (item.official && !enabled) {
       new com.deepseekharness.app.ui.DshaDialogBuilder(requireContext(), true)
           .setTitle(com.deepseekharness.app.util.UiText.text("禁用官方核心？"))

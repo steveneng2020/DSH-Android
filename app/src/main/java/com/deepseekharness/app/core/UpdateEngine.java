@@ -43,6 +43,10 @@ public final class UpdateEngine {
   }
 
   public static final String FEED = com.deepseekharness.app.util.UpdateLocations.FEED;
+  /** 清单读取最多尝试次数（含首次）。3 次是弱网下「够用且不让用户等太久」的折中。 */
+  private static final int MAX_FEED_ATTEMPTS = 3;
+  /** 清单体积上限，防止被超大响应拖死；与下载路径的 1 MiB 口径一致。 */
+  private static final int MAX_FEED_BYTES = 1024 * 1024;
   private static final ExecutorService IO = Executors.newSingleThreadExecutor();
   private final AtomicBoolean busy = new AtomicBoolean();
   private volatile boolean cancelled;
@@ -265,29 +269,7 @@ public final class UpdateEngine {
     submit(
         checkingMessage(),
         () -> {
-          HttpURLConnection conn = transport.open(FEED, 0);
-          connection = conn;
-          byte[] raw;
-          try {
-            int status = conn.getResponseCode();
-            if (status == 404 || status == 410) raw = null;
-            else {
-              if (status != 200) throw new UpdateFailures.HttpFailure(status);
-              try (InputStream input = conn.getInputStream();
-                  ByteArrayOutputStream bytes = new ByteArrayOutputStream()) {
-                byte[] buffer = new byte[8192];
-                int n;
-                while ((n = input.read(buffer)) != -1) {
-                  ensureActive();
-                  if (bytes.size() + n > 1024 * 1024) throw new UpdateFailures.InvalidManifest();
-                  bytes.write(buffer, 0, n);
-                }
-                raw = bytes.toByteArray();
-              }
-            }
-          } finally {
-            conn.disconnect();
-          }
+          byte[] raw = fetchFeedWithRetry();
           java.util.List<UpdatePolicy.Release> options =
               raw == null
                   ? java.util.Collections.emptyList()
@@ -318,6 +300,93 @@ public final class UpdateEngine {
               ? com.deepseekharness.app.util.UiText.format("发现新版本 %s", candidate.version)
               : com.deepseekharness.app.util.UiText.choose("暂无可用更新", "No updates available");
         });
+  }
+
+  /**
+   * 读取更新清单，瞬时网络中断自动重试。
+   *
+   * <p><b>为什么需要重试</b>：超时本身已有（{@code util/UpdateRedirects} 设了 15s 连接 /
+   * 30s 读取），但**一次失败就得让用户手动再点一次**。实测 {@code raw.githubusercontent.com}
+   * 首字节常在 4 秒以上，且偶发响应体被中途掐断（{@code unexpected end of stream}）——
+   * 这类中断是瞬时的，重试即可成功。
+   *
+   * <p><b>只重试「读取类」错误</b>：清单格式非法、签名不符、HTTP 4xx 属于确定性错误，
+   * 重试只会让用户多等 3 秒并看到同样的失败。判据交给
+   * {@link com.deepseekharness.app.util.UpdateFailures#kind}，不另建一套分类。
+   *
+   * <p>退避 1s / 2s，期间响应取消（{@code ensureActive}）。
+   */
+  private byte[] fetchFeedWithRetry() throws Exception {
+    Exception last = null;
+    for (int attempt = 1; attempt <= MAX_FEED_ATTEMPTS; attempt++) {
+      ensureActive();
+      HttpURLConnection conn = null;
+      try {
+        conn = transport.open(FEED, 0);
+        connection = conn;
+        int status = conn.getResponseCode();
+        if (status == 404 || status == 410) return null;   // 未发布任何候选
+        if (status != 200) throw new UpdateFailures.HttpFailure(status);
+        try (InputStream input = conn.getInputStream();
+            ByteArrayOutputStream bytes = new ByteArrayOutputStream()) {
+          byte[] buffer = new byte[8192];
+          int n;
+          while ((n = input.read(buffer)) != -1) {
+            ensureActive();
+            if (bytes.size() + n > MAX_FEED_BYTES) throw new UpdateFailures.InvalidManifest();
+            bytes.write(buffer, 0, n);
+          }
+          return bytes.toByteArray();
+        }
+      } catch (Exception error) {
+        last = error;
+        if (!retryableFeedError(error) || attempt == MAX_FEED_ATTEMPTS) throw error;
+        try {
+          Thread.sleep(1000L * attempt);
+        } catch (InterruptedException interrupted) {
+          Thread.currentThread().interrupt();
+          throw interrupted;
+        }
+      } finally {
+        if (conn != null) conn.disconnect();
+      }
+    }
+    throw last == null ? new java.io.IOException("UPDATE_FEED_UNREACHABLE") : last;
+  }
+
+  /**
+   * 该错误是否值得重试。
+   *
+   * <p>只用 {@link com.deepseekharness.app.util.UpdateFailures.Kind} 的既有分类：
+   * {@code TIMEOUT} / {@code OFFLINE} / {@code TLS} 是瞬时网络问题；
+   * {@code CERTIFICATE} 是确定性的（证书不对，重试一万次也一样），
+   * {@code HTTP} / {@code MANIFEST} 更是确定性错误。
+   *
+   * <p>例外：{@code OTHER} 里有些底层 IO 中断（连接被重置、流被截断）没有映射到具体 Kind，
+   * 按错误文本判一次 —— 但**只在 Kind 为 OTHER 时**才看文本，避免绕过既有分类。
+   */
+  private static boolean retryableFeedError(Throwable error) {
+    switch (com.deepseekharness.app.util.UpdateFailures.kind(error)) {
+      case TIMEOUT:
+      case OFFLINE:
+      case TLS:
+        return true;
+      case CERTIFICATE:
+      case HTTP:
+      case MANIFEST:
+        return false;
+      default:
+        break;
+    }
+    String text = String.valueOf(error == null ? "" : error.getMessage())
+        .toLowerCase(java.util.Locale.ROOT);
+    return text.contains("unexpected end of stream")
+        || text.contains("end of stream")
+        || text.contains("connection closed")
+        || text.contains("reset by peer")
+        || text.contains("econnreset")
+        || text.contains("broken pipe")
+        || text.contains("stream reset");
   }
 
   public void download() {

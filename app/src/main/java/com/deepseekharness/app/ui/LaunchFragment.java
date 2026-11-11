@@ -61,6 +61,14 @@ public class LaunchFragment extends Fragment {
   private boolean enteringWeb;
 
   private boolean webEntryFailure;
+  /**
+   * 进入网页时记录的 Web 代次；-1 表示当前没有在途的进入。
+   *
+   * <p>为什么要单独记一份：{@code webEntryGeneration()} 给的是**此刻**的代次，
+   * 没有它就无法回答「我等的那一代是不是已经被换掉了」。两者不同意味着这次进入作废，
+   * 应复位成「可重试」而不是判成失败 —— 用户什么都没做错，只是 Web 重启了。
+   */
+  private long enteredGeneration = -1L;
 
   private boolean preparingStart;
   // Preserve admission failures until the next explicit action or a ready Web instance.
@@ -320,6 +328,7 @@ public class LaunchFragment extends Fragment {
     }
     final long generation = webEntryGeneration();
     enteringWeb = true;
+    enteredGeneration = generation;
     webEntryFailure = false;
     ((TextView) root.findViewById(R.id.launch_status))
         .setText(com.deepseekharness.app.util.UiText.choose("打开中…", "Opening Web…"));
@@ -330,7 +339,11 @@ public class LaunchFragment extends Fragment {
         return;
       }
       if (generation != webEntryGeneration() || !url.equals(webEntryUrl())) {
-        finishWebEntry(root, com.deepseekharness.app.util.UiText.text("状态已变化，请稍后重试"));
+        // 代次变了 = 用户等的那一代 Web 已被换掉，不是「等太久」，也不是失败。
+        // 旧实现走 finishWebEntry（置 webEntryFailure=true）会让按钮停在失败态，
+        // 用户看到「状态已变化，请稍后重试」却不知道该怎么办。
+        // 正确语义是复位成「可以再点一次」，并说明原因。
+        resetWebEntryForGeneration(root);
         return;
       }
       // The browser owns the token -> cookie -> HTTP 200 verification. Doing it here
@@ -359,8 +372,37 @@ public class LaunchFragment extends Fragment {
     startActivity(WebPreviewActivity.intent(activity, url, cookie));
   }
 
+  /**
+   * 代次已变时复位进入态，使按钮回到「可点」并说明原因。
+   *
+   * <p>与 {@link #finishWebEntry} 的分工：
+   * <ul>
+   *   <li>{@code finishWebEntry} 用于**真失败**（URL 拿不到、打开异常）—— 置 {@code webEntryFailure}，
+   *       界面按失败样式呈现
+   *   <li>本方法用于**这次进入作废**（Web 换代）—— 不置失败，只提示「Web 已重启，请重新进入」
+   * </ul>
+   * 两者混用会让用户分不清是「坏了」还是「再来一次就好」。
+   */
+  private boolean resetWebEntryForGeneration(View root) {
+    enteringWeb = false;
+    enteredGeneration = -1L;
+    webEntryFailure = false;
+    if (root != null) {
+      TextView status = root.findViewById(R.id.launch_status);
+      if (status != null) {
+        status.setVisibility(View.VISIBLE);
+        // 走资源而不是内联文本：本页其它常驻文案同样用 R.string，
+        // 且在 values/ 与 values-en/ 各有一份（about_changelog_strings.xml:21）。
+        status.setText(root.getContext().getString(R.string.ui2_web_restarted));
+      }
+    }
+    refreshRunState();
+    return true;
+  }
+
   private void finishWebEntry(View root, String message) {
     enteringWeb = false;
+    enteredGeneration = -1L;
     webEntryFailure = true;
     ((TextView) root.findViewById(R.id.launch_status))
         .setText(com.deepseekharness.app.util.UiStateText.render(message));
@@ -369,6 +411,7 @@ public class LaunchFragment extends Fragment {
 
   private void invalidateWebEntry() {
     enteringWeb = false;
+    enteredGeneration = -1L;
   }
 
   /**
