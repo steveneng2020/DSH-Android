@@ -118,13 +118,37 @@ def verify(apk):
     return problems, facts
 
 
-def target_name(facts, apk):
-    """DSHA-<版本>-<YYYYMMDD>-<HHMM>.apk；日期时刻取 APK 自身 mtime 的**北京时间**。
+def sanitize_note(note):
+    """把「主要更新内容」压成可放进文件名的短标签。
+
+    2026-11-11 用户要求：同版本反复测试导致 builds/ 里几十个包名字一样、分不清，
+    要在时间后追加「-主要更新内容」；正式发布时再加 `-release`。
+
+    文件名约束（跨平台 + shell 安全）：不允许 / \\ : * ? " < > | 与空白和控制字符，
+    长度限 24 个字符。中文保留原样——本项目全部产物都在 Android/Linux 上流转，
+    不要求 ASCII——但空格一律换成 `-`，否则 shell 里必须引号、也容易被门禁误判。
+    """
+    if not note:
+        return ''
+    tag = re.sub(r'[\s/\\:*?"<>|]+', '-', note.strip())
+    tag = re.sub(r'-{2,}', '-', tag).strip('-')
+    # 去掉首尾的点（隐藏文件 / 末尾点在某些文件系统上非法）
+    tag = tag.strip('.')
+    return tag[:24]
+
+
+def target_name(facts, apk, note='', release=False):
+    """DSHA-<版本>-<YYYYMMDD>-<HHMM>[-<主要更新内容>][-release].apk
+
+    日期时刻取 APK 自身 mtime 的**北京时间**。
 
     2026-11-11 教训：容器默认时区是 UTC，用 time.localtime() 会把
     北京时间 2026-11-11 00:57 的产物命名成 `20261110-1657`，
     与 versionName 里的 20261111 自相矛盾（差一天）。
     这里显式换成 Asia/Shanghai，与项目「构建日期用北京时间」的约定一致。
+
+    2026-11-11 追加：`-<主要更新内容>` 与 `-release` 由用户要求，
+    门禁 `tools/gate.py` 的 G12 负责校验本函数的产物符合该规范。
     """
     moment = datetime.datetime.fromtimestamp(apk.stat().st_mtime,
                                             datetime.timezone(datetime.timedelta(hours=8)))
@@ -132,13 +156,23 @@ def target_name(facts, apk):
     # versionName 形如 `DSHA v1.4 20261111@0.2.1-rc.2`，取 `v1.4` 那段
     match = re.search(r'\bv\d+(?:\.\d+)*\b', facts['versionName'])
     short = match.group(0) if match else 'v?'
-    return 'DSHA-%s-%s.apk' % (short, stamp)
+    tag = sanitize_note(note)
+    parts = ['DSHA', short, stamp]
+    if tag:
+        parts.append(tag)
+    if release:
+        parts.append('release')
+    return '-'.join(parts) + '.apk'
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__.split('\n')[0])
     parser.add_argument('--out', type=Path, default=DEFAULT_OUT)
     parser.add_argument('--dry-run', action='store_true')
+    parser.add_argument('--note', default='',
+                        help='主要更新内容，追加到时间后作为文件名标签，例如「图标提示条修复」')
+    parser.add_argument('--release', action='store_true',
+                        help='这是要对外发布的正式版，文件名追加 -release')
     args = parser.parse_args()
 
     problems, facts = verify(APK)
@@ -160,7 +194,7 @@ def main():
         print('（先让 updates.json 与本产物一致，再输出）')
         return 1
 
-    name = target_name(facts, APK)
+    name = target_name(facts, APK, note=args.note, release=args.release)
     target = args.out / name
     print('产物 : %s' % APK)
     print('版本 : %s  (versionCode %s)' % (facts['versionName'], facts['versionCode']))
@@ -178,8 +212,11 @@ def main():
     if hashlib.sha256(target.read_bytes()).hexdigest() != digest:
         print('FAIL COPY_CORRUPTED: 复制后摘要不一致')
         return 1
+    # 2026-11-11：文件名可含中文（--note 标签），这里不能再用 ascii 编码，
+    # 否则 sha256 校验文件写不出去（实测 UnicodeEncodeError）。
+    # sha256sum 本身按字节比对，UTF-8 文件名可被 --check 正常读取。
     target.with_suffix('.apk.sha256').write_text(
-        '%s  %s\n' % (digest, target.name), encoding='ascii')
+        '%s  %s\n' % (digest, target.name), encoding='utf-8')
     print('已输出：%s' % target)
     return 0
 

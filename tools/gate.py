@@ -16,6 +16,7 @@
 退出码 0 = GATE PASS；非 0 = 有 FAIL。
 """
 import os
+import pathlib
 import re
 import subprocess
 import sys
@@ -770,6 +771,113 @@ def gate_self_count():
                              % (m.group(1), n_code))
 
 
+def gate_build_naming():
+    """G12 builds/ 产物文件名必须带「主要更新内容」标签，正式版还要带 -release。
+
+    2026-11-11 用户原话：
+      「build 同一版本 app 因不断测试，数量很多，很乱，在时间后增加：-主要更新内容。
+        当是最后发布的正式版时，额外加上 release。把该要求写到门禁中。」
+
+    为什么必须进门禁而不是只改脚本：builds/ 里当时已经堆了 36 个 apk，
+    其中 2005/2010/2022/2058/2108 五个包名字只差时刻，事后根本分不清哪个改了什么。
+    只靠人记得传 --note，一定会忘。
+
+    判据分两层：
+      ① 规范本身可执行：target_name() 真的会拼出 -<标签> 与 -release
+      ② 现存产物：带完整时间戳的产物必须带标签；-release 只对正式发布的包要求，
+         不追溯历史包（改名会破坏 updates.json 与已发布 Release 的对应关系）。
+    """
+    print("[8/9] check_build_naming  builds/ 产物命名规范")
+    script = os.path.join(SRC, "tools", "export-release-apk.py")
+    if not os.path.exists(script):
+        fails.append("G12 缺 tools/export-release-apk.py")
+        return
+    src = open(script, encoding="utf-8").read()
+
+    # ① 行为验证，不是文本验证。
+    # 2026-11-11 教训（MEMORY §4 第 40 条）：断言脚本里的字符串存在，不等于它真的会那么做。
+    # 这里直接 import 该模块、真调 target_name()，看三种形态各自拼出什么。
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("_export_apk_probe", script)
+    probe = importlib.util.module_from_spec(spec)
+    try:
+        spec.loader.exec_module(probe)
+    except Exception as exc:
+        fails.append("G12 export-release-apk.py 无法加载：%s" % exc)
+        return
+    if not hasattr(probe, "target_name"):
+        fails.append("G12 export-release-apk.py 没有 target_name()")
+        return
+
+    apk = os.path.join(SRC, "app/build/outputs/apk/standard/release/app-standard-release.apk")
+    if not os.path.exists(apk):
+        warns.append("G12 找不到产物，无法验证命名行为")
+        return
+
+    class _Facts(dict):
+        pass
+
+    facts = _Facts(versionName="v1.4 20261111@0.2.2-rc.1")
+    cases = [
+        (dict(note="", release=False), None, "无标签测试包（应只有 版本+时间）"),
+        (dict(note="图标提示条修复", release=False), "图标提示条修复", "带标签测试包"),
+        (dict(note="图标提示条修复", release=True), "-release", "正式版（须带 -release）"),
+    ]
+    for kwargs, expect, label in cases:
+        try:
+            got = probe.target_name(facts, pathlib.Path(apk), **kwargs)
+        except Exception as exc:
+            fails.append("G12 target_name(%s) 抛异常：%s" % (kwargs, exc))
+            continue
+        if not got.endswith(".apk"):
+            fails.append("G12 %s：产物名 %r 不以 .apk 结尾" % (label, got))
+        if expect is None:
+            # 无标签时必须「版本-日期-时刻」三段，不能多出标签
+            if not re.fullmatch(r"DSHA-v[\d.]+-\d{8}-\d{4}\.apk", got):
+                fails.append("G12 %s：期望 DSHA-v<版本>-<日期>-<时刻>.apk，实际 %r" % (label, got))
+        elif expect not in got:
+            fails.append("G12 %s：期望含 %r，实际 %r" % (label, expect, got))
+    # 净化必须真的生效：非法字符不能进文件名
+    dirty = probe.target_name(facts, pathlib.Path(apk), note="a/b:c*d", release=False)
+    if any(ch in dirty for ch in '/\\:*?"<>|'):
+        fails.append("G12 标签净化失效：%r 仍含非法字符" % dirty)
+    print("    命名行为验证通过（无标签/带标签/正式版/净化 四种形态）")
+
+    # ② 现存产物。规范自 2026-11-11 23:00（北京时间）起生效：
+    #    此前产出的历史包只 WARN —— 改名会破坏 updates.json 与已发布 Release 的对应关系，
+    #    这是用户明确要求「不要批量改名」的边界（见 docs/交接规程.md §4.3b）。
+    builds = os.path.join(WS, "builds")
+    if not os.path.isdir(builds):
+        warns.append("G12 找不到 builds/ 目录，跳过产物检查")
+        return
+    CUTOFF = 1794409200          # 2026-11-11 23:00:00 +0800
+    pattern = re.compile(r"^DSHA-v[\d.]+-(\d{8})-(\d{4})(-(.*))?\.apk$")
+    new_bad, old_bad = [], []
+    for name in sorted(os.listdir(builds)):
+        if not name.endswith(".apk"):
+            continue
+        m = pattern.match(name)
+        if not m:
+            continue
+        rest = m.group(3)
+        if rest and rest.strip("-"):
+            continue
+        path = os.path.join(builds, name)
+        (new_bad if os.path.getmtime(path) >= CUTOFF else old_bad).append(name)
+    if new_bad:
+        fails.append(
+            "G12 规范生效后仍有产物不带「主要更新内容」标签：%s。"
+            "构建完必须 python3 tools/export-release-apk.py --note '改了什么'"
+            "（正式版再加 --release）" % "、".join(new_bad[:6]))
+    if old_bad:
+        warns.append(
+            "G12 builds/ 里有 %d 个 2026-11-11 23:00 前的历史包没有标签（不追溯，"
+            "改名会破坏 updates.json 与已发布 Release 的对应）：%s… 可在下次清 builds/ 时一并处理"
+            % (len(old_bad), "、".join(old_bad[:4])))
+    if not new_bad and not old_bad:
+        print("    builds/ 内产物命名全部合规")
+
+
 def main():
     if not os.path.isdir(SRC):
         print("FAIL: 找不到 %s" % SRC)
@@ -783,6 +891,7 @@ def main():
     gate_doc_freshness()
     gate_workspace_copy()
     gate_fork_topology()
+    gate_build_naming()
 
     print()
     for w in warns:
