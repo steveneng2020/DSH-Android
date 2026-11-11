@@ -25,6 +25,8 @@ public final class IconSwitcher {
   };
   public static final int COUNT = ALIAS_SUFFIXES.length;
   private static final String KEY_INDEX = "index";
+  /** 用户是否显式选过图标；用于区分「从未选过」与「选过但被覆盖安装重置」。 */
+  private static final String KEY_EXPLICIT = "explicit";
   private static final String PREFS = "dsha_icon_style";
   public static final int[] LABELS = {
     R.string.icon_style_default,
@@ -94,8 +96,30 @@ public final class IconSwitcher {
         applied = false;
       }
     }
-    prefs(context).edit().putInt(KEY_INDEX, index).apply();
+    // 同时记下「用户显式选过」，供启动时判断是否需要把组件状态拉回偏好值。
+    // 没有这个标记就无法区分「从未选过」和「选过但被覆盖安装重置」。
+    prefs(context).edit().putInt(KEY_INDEX, index).putBoolean(KEY_EXPLICIT, true).apply();
     return applied;
+  }
+
+  /**
+   * 启动时把组件启用状态对齐到偏好。
+   *
+   * <p>为什么需要：覆盖安装会让系统把 6 个 activity-alias 重置成 manifest 默认值
+   * （只有 LauncherDefault 为 true），而 SharedPreferences 里的选择仍然保留。
+   * 于是用户上次选的配色看起来"丢了"——实际是组件状态被系统重置，
+   * 而 current() 优先读组件状态，读到的就是被重置后的 0。
+   *
+   * <p>只在「用户显式选过」时恢复；首次安装不动，避免覆盖 manifest 的默认值。
+   */
+  public static void restoreIfNeeded(Context context) {
+    SharedPreferences p = prefs(context);
+    if (!p.getBoolean(KEY_EXPLICIT, false)) return;
+    int saved = p.getInt(KEY_INDEX, 0);
+    if (saved <= 0 || saved >= ALIAS_SUFFIXES.length) return;
+    // 已经一致就不写，避免每次启动都触发组件状态变更（可能引起桌面重绘）。
+    if (current(context) == saved) return;
+    apply(context, saved);
   }
 
   /** 提示已切换为哪套图标。 */

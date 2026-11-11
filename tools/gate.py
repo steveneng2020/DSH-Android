@@ -552,6 +552,42 @@ def gate_fork_topology():
     if len([l for l in remotes.splitlines() if l.startswith("upstream")]) < 1:
         problems.append("upstream remote 缺失 —— 之后 fetch 不到上游新提交")
 
+    # ④b ref 丢失的真假判断（2026-11-11 新增）
+    #
+    # 踩过的坑：tools/fetch-upstream.sh 第一版加了 `git fetch --prune`，
+    # 结果把 upstream/v0.2.2、upstream/main 两个 ref 删了（上游已从 heads 移走它们）。
+    # ref 一没，merge-base 报空，**看起来就像 fork 关系断了** —— 足以把人骗去重建分支。
+    # 而实际对象都在，用 SHA 仍能算出 merge-base。
+    #
+    # 所以「merge-base 为空」不能直接判「断亲」，必须先分清是哪种：
+    #   对象在 -> 只是 ref 丢了，可补回，关系完好
+    #   对象不在 -> 真断了
+    up_sha, rc_sha = sh(["git", "rev-parse", "upstream/v0.2.2"])
+    if rc_sha != 0 or not up_sha:
+        # ref 缺失，尝试用 tag 兜底判断对象是否还在
+        tag_sha, rc_tag = sh(["git", "rev-parse", "refs/tags/v0.2.2"])
+        if rc_tag == 0 and tag_sha:
+            obj, rc_obj = sh(["git", "cat-file", "-t", tag_sha])
+            if rc_obj == 0 and obj.strip() == "commit":
+                problems.append(
+                    "upstream/v0.2.2 ref 缺失，但对象 %s 仍在 —— "
+                    "这是 ref 被 --prune 误删（**假断亲**），关系完好。"
+                    "修复: git update-ref refs/remotes/upstream/v0.2.2 %s"
+                    % (tag_sha[:12], tag_sha))
+            else:
+                problems.append("upstream/v0.2.2 缺失且对象不存在 —— 真断亲或未 fetch")
+        else:
+            problems.append("upstream/v0.2.2 ref 与 tag 都缺失 —— 先跑 tools/fetch-upstream.sh")
+
+    # ④c 禁止在 fetch 时用 --prune（会制造假断亲）
+    #     检查手段：仓库存不存在被 prune 过的痕迹 —— 有 upstream ref 数明显少于上游
+    #     实际 heads+tags 数时，说明曾被 prune。此处只做提醒，不阻断（可能是正常清理）。
+    up_refs, _ = sh(["git", "for-each-ref", "--format=%(refname)", "refs/remotes/upstream/"])
+    n_up_refs = len([l for l in up_refs.splitlines() if l.strip()])
+    if n_up_refs == 0:
+        problems.append("refs/remotes/upstream/ 下无任何 ref —— "
+                        "要么没 fetch，要么被 --prune 清空（假断亲）")
+
     # ⑤ 历史上不得有改写痕迹：reflog 里出现 filter-repo / rebase 到上游祖先
     #    这是「光看当前状态看不出来」的那一类：事后 graft 一下，merge-base 会「看起来」正常
     reflog, _ = sh(["git", "reflog", "--all", "--date=iso"])
@@ -568,6 +604,49 @@ def gate_fork_topology():
         if n_roots > 2:
             # 上游本身可能有多根（历史迁移），这里只在明显异常时报
             problems.append("HEAD 有 %d 个无父根 —— 疑似混入无关历史" % n_roots)
+
+    # ⑥b T20：声明类产物必须与 fork 版对齐（2026-11-11 真机验收暴露）
+    man = os.path.join(SRC, 'app/src/main/AndroidManifest.xml')
+    if os.path.exists(man):
+        mt = open(man, encoding='utf-8').read()
+        # a) 必须恰好 6 个图标 alias（LauncherDefault/Moyu/Tianqing/Zheshi/Biyu/Zishou）
+        n_alias = mt.count('<activity-alias')
+        # 准确数量是 6（六套图标各一个）。此前写成 13 是误读：
+        # 当时用 grep -A3 activity-alias | grep 数的是匹配行而非 alias 块。n_alias = mt.count('<activity-alias')
+        if n_alias != 6:
+            problems.append(
+                'T20② activity-alias 数量为 %d，期望 6 —— '
+                '六套图标切换会静默失效（apply() 抛异常被 catch 吞掉，用户看到切换成功实际没变）'
+                % n_alias)
+        # b) MainActivity 不得再声明 LAUNCHER（否则两个桌面图标）
+        #   定位 MainActivity 自己的 <activity> 块：从 android:name=".ui.MainActivity"
+        #   往前找到最近的 <activity，往后找到最近的 </activity>，只在这段内判定。
+        #   2026-11-11 修：原实现从 find(".ui.MainActivity") 直接吃到第一个 </activity>，
+        #   会把紧随其后的 activity-alias 里的 LAUNCHER 扫进来，造成假红。
+        _i = mt.find('.ui.MainActivity')
+        seg = ''
+        if _i >= 0:
+            _s = mt.rfind('<activity', 0, _i)
+            _e = mt.find('</activity>', _i)
+            seg = mt[_s:_e] if _s >= 0 and _e > _i else ''
+        _main_has_launcher = ('CATEGORY_LAUNCHER' in seg or 'category.LAUNCHER' in seg)
+        if _main_has_launcher:
+            problems.append(
+                'T20② MainActivity 仍声明 LAUNCHER —— 桌面会出现两个图标；'
+                '桌面入口必须完全交给 activity-alias')
+        # c) 三个 fork Activity 必须注册
+        for act in ('OnboardingPrepareActivity', 'SkillsActivity', 'WelcomeActivity'):
+            if act not in mt:
+                problems.append('T20① Manifest 缺少 %s 声明' % act)
+        # d) IconSwitcher.restoreIfNeeded 必须被 DshaApp 调用
+        app = os.path.join(SRC, 'app/src/main/java/com/deepseekharness/app/DshaApp.java')
+        if os.path.exists(app):
+            if 'restoreIfNeeded' not in open(app, encoding='utf-8').read():
+                problems.append(
+                    'T20③ DshaApp.onCreate 未调用 IconSwitcher.restoreIfNeeded() —— '
+                    '覆盖安装后图标选择会被重置且无提示')
+        print('    T20: alias=%d, MainActivity-有LAUNCHER=%s'
+              % (n_alias, _main_has_launcher))
 
     # ⑦ 冲突面必须可登记：A 数应远大于 M 数（T19 ⑩）
     ns, rc = sh(["git", "diff", "--name-status", "upstream/v0.2.2", "HEAD"])

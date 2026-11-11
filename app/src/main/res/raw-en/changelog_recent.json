@@ -7,7 +7,7 @@
     {
       "version": "DSHA v1.4 20261111@0.2.2-rc.1",
       "build": "build20050357",
-      "title": "Startup fixes + faster startup + reasoning-effort adaptation",
+      "title": "Startup fixes + reasoning-effort adaptation",
       "date": "2026-11-11",
       "bullets": [
         "Fixed the blank startup page after upgrades, the unresponsive \"Start DSHA\" button, and occasional stalls on the recovery page.",
@@ -25,7 +25,7 @@
       ]
     },
     {
-      "version": "DSHA v1.3 2026-10-27@0.2.1-rc.2",
+      "version": "DSHA v1.3 20261027@0.2.1-rc.2",
       "build": "build20040190",
       "title": "Plugin install transaction safety",
       "date": "2026-10-27",
@@ -35,7 +35,7 @@
       ]
     },
     {
-      "version": "DSHA v1.2 2026-10-26@0.2.1-rc.2",
+      "version": "DSHA v1.2 20261026@0.2.1-rc.2",
       "build": "build20030190",
       "title": "Six color schemes finalized + icon fills the canvas",
       "date": "2026-10-26",
@@ -46,7 +46,7 @@
       ]
     },
     {
-      "version": "DSHA v1.1 2026-10-26@0.2.1-rc.2",
+      "version": "DSHA v1.1 20261026@0.2.1-rc.2",
       "build": "build20020190",
       "title": "Kun icon rework + six switchable color schemes",
       "date": "2026-10-26",
@@ -57,7 +57,7 @@
       ]
     },
     {
-      "version": "DSHA v1 2026-10-25@0.2.1-rc.2",
+      "version": "DSHA v1 20261025@0.2.1-rc.2",
       "build": "build20010190",
       "title": "Independent package name (first release)",
       "date": "2026-10-25",

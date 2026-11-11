@@ -42,6 +42,16 @@ public final class IconPickerDialog {
     LinearLayout.LayoutParams subtitleParams = new LinearLayout.LayoutParams(-1, -2);
     subtitleParams.topMargin = dp(context, 4);
     content.addView(subtitle, subtitleParams);
+    // fork：图标出处与寓意（用户要求）。放在副标题下方，一次说清「这是什么、为什么是它」，
+    // 免得每次看到弹窗都得回去查 README 的「图标寓意」节。
+    TextView lore = new TextView(context);
+    lore.setText(R.string.icon_style_lore);
+    lore.setTextSize(11f);
+    lore.setTextColor(context.getColor(R.color.text_secondary));
+    lore.setLineSpacing(0, 1.15f);
+    LinearLayout.LayoutParams loreParams = new LinearLayout.LayoutParams(-1, -2);
+    loreParams.topMargin = dp(context, 8);
+    content.addView(lore, loreParams);
     LinearLayout list = new LinearLayout(context);
     list.setOrientation(LinearLayout.VERTICAL);
     LinearLayout.LayoutParams listParams = new LinearLayout.LayoutParams(-1, -2);

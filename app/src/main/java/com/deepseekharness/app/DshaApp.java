@@ -154,6 +154,9 @@ public class DshaApp extends Application
     com.deepseekharness.app.ui.LanguageController.apply(this);
     ShizukuShell.init(this);
     com.deepseekharness.app.ui.ThemeController.apply(this);
+    // 覆盖安装会把六套图标的 activity-alias 重置成 manifest 默认值，
+    // 而偏好里的选择仍在。启动时对齐一次，否则用户上次选的配色看起来"丢了"。
+    com.deepseekharness.app.ui.IconSwitcher.restoreIfNeeded(this);
     // 调色板色经主题属性引用：应用上下文也带上应用主题，避免直接用它取色时属性无从解析。
     setTheme(R.style.Theme_DeepseekHarness);
     com.deepseekharness.app.core.RuntimeTasks.initialize(this);

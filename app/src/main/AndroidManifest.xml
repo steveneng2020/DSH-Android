@@ -88,11 +88,92 @@
             android:launchMode="singleTop"
             android:documentLaunchMode="never"
             android:windowSoftInputMode="adjustResize">
+            <!-- fork：桌面入口由下方 6 个 activity-alias 提供（IconSwitcher 启停其一），
+                 此处只保留 MAIN、不再声明 LAUNCHER，否则会出现两个桌面图标。 -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+            </intent-filter>
+        </activity>
+
+        <!-- 六套主题图标：桌面入口由 activity-alias 提供，IconSwitcher 用 PackageManager 启停其一。 -->
+        <activity-alias
+            android:name="com.deepseekharness.app.LauncherDefault"
+            android:enabled="true"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_default"
+            android:label="@string/app_name"
+            android:roundIcon="@mipmap/ic_launcher_round_default"
+            android:targetActivity="com.deepseekharness.app.ui.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
+        </activity-alias>
+        <activity-alias
+            android:name="com.deepseekharness.app.LauncherBiyu"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_biyu"
+            android:label="@string/app_name"
+            android:roundIcon="@mipmap/ic_launcher_round_biyu"
+            android:targetActivity="com.deepseekharness.app.ui.MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name="com.deepseekharness.app.LauncherMoyu"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_moyu"
+            android:label="@string/app_name"
+            android:roundIcon="@mipmap/ic_launcher_round_moyu"
+            android:targetActivity="com.deepseekharness.app.ui.MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name="com.deepseekharness.app.LauncherTianqing"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_tianqing"
+            android:label="@string/app_name"
+            android:roundIcon="@mipmap/ic_launcher_round_tianqing"
+            android:targetActivity="com.deepseekharness.app.ui.MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name="com.deepseekharness.app.LauncherZheshi"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_zheshi"
+            android:label="@string/app_name"
+            android:roundIcon="@mipmap/ic_launcher_round_zheshi"
+            android:targetActivity="com.deepseekharness.app.ui.MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name="com.deepseekharness.app.LauncherZishou"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_zishou"
+            android:label="@string/app_name"
+            android:roundIcon="@mipmap/ic_launcher_round_zishou"
+            android:targetActivity="com.deepseekharness.app.ui.MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
 
         <!-- 常驻通知的应用入口中转：独立 affinity，不把 Main 任务带到前台；透明且立即结束。 -->
         <activity
