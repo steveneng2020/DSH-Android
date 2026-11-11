@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 安全模式（第三方插件全部停用）的界面文案；与 APK 的 ui_m0221~ui_m0227 资源名一一对应。 -->
+<resources>
+    <string name="ui_m0221">进入安全模式</string>
+    <string name="ui_m0222">安全模式已开启：第三方插件已全部停用</string>
+    <string name="ui_m0223">插件配置与数据都保留；退出安全模式后按原状态恢复。正在运行的任务可能已中断。</string>
+    <string name="ui_m0224">进入安全模式？</string>
+    <string name="ui_m0225">将停用全部第三方插件（内置插件不受影响）。插件配置不会丢失，退出安全模式后恢复。当前正在运行的任务可能中断。之后需要重启 Web 才会生效。</string>
+    <string name="ui_m0226">停用并进入</string>
+    <string name="ui_m0227">安全模式下不能安装或启用新插件；请先退出安全模式。</string>
+</resources>

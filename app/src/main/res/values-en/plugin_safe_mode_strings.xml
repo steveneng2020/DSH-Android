@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 安全模式（第三方插件全部停用）的界面文案；与 APK 的 ui_m0221~ui_m0227 资源名一一对应。 -->
+<resources>
+    <string name="ui_m0221">Enter safe mode</string>
+    <string name="ui_m0222">Safe mode is on: all third-party plugins are disabled</string>
+    <string name="ui_m0223">Plugin settings and data are kept and restored when you leave safe mode. Running tasks may have been interrupted.</string>
+    <string name="ui_m0224">Enter safe mode?</string>
+    <string name="ui_m0225">All third-party plugins will be disabled (built-in plugins are unaffected). Plugin settings are not lost and come back when you leave safe mode. Running tasks may be interrupted. Restart the Web service afterwards to apply.</string>
+    <string name="ui_m0226">Disable and enter</string>
+    <string name="ui_m0227">New plugins cannot be installed or enabled in safe mode; leave safe mode first.</string>
+</resources>

@@ -1,0 +1,89 @@
+{
+  "schema": 1,
+  "purpose": "随 APK 分发的 GPL / LGPL 原生二进制的来源溯源。此前 THIRD_PARTY_NOTICES 对这几项写的是「exact revision unverified」，本文件把能核实的部分核实到可复核的程度，并把仍不可证明的部分明确写出来。",
+  "verifiedOn": "2026-11-11",
+  "binaries": {
+    "libproot.so": {
+      "license": "GPL-2.0",
+      "sha256": "cbde86eb01b58413f9e4673e182caca5440e8fc4af8482a0e23d0faa0846f721",
+      "bytes": 268976,
+      "upstream": {
+        "project": "termux/proot",
+        "version": "5.1.107.91",
+        "versionEvidence": "二进制内嵌字符串 v5.1.107.91（由 Termux 构建脚本 -DVERSION=\"5.1.107.91\" 写入）",
+        "sourceUrl": "https://github.com/termux/proot/archive/v5.1.107.91.zip",
+        "sourceSha256": "a7bc2fab34bf9a39073e8291f08a662e848c61a67494e59f5f84f5ca10690128",
+        "sourceSha256Verified": true,
+        "builderRepo": "termux/termux-packages",
+        "builderCommit": "8ec1d20717",
+        "builderCommitDate": "2026-08-16",
+        "buildArgs": "make -C src PROOT_WITH_LIBANDROID_SHMEM=true; CPPFLAGS += -DARG_MAX=131072 -DVERSION=\"5.1.107.91\"",
+        "toolchain": "Android clang 17.0.2 (r487747d)"
+      },
+      "status": "source-identified",
+      "residualGap": "源码与版本已确定且摘要可复核。但 Termux 未提供该版本 deb 的可用副本（官方池只保留最新 5.1.107.102，archive.termux.dev 当前不可达），因此无法把本二进制与某个 deb 逐字节比对；本文件证明的是「由该源码版本按该参数构建」，不是「与该 deb 字节相同」。"
+    },
+    "libprootloader.so": {
+      "license": "GPL-2.0",
+      "sha256": "a2cbccfc776e23225b75e6700dd1990fcd505d2e973f5bfa19c76642d4e41c7d",
+      "bytes": 67736,
+      "upstream": {
+        "project": "termux/proot",
+        "version": "5.1.107.91",
+        "versionEvidence": "与 libproot.so 同一 Termux 包构建（同一 toolchain clang 17.0.2 r487747d），由 proot 构建过程产出 loader",
+        "sourceUrl": "https://github.com/termux/proot/archive/v5.1.107.91.zip",
+        "sourceSha256": "a7bc2fab34bf9a39073e8291f08a662e848c61a67494e59f5f84f5ca10690128",
+        "sourceSha256Verified": true,
+        "builderRepo": "termux/termux-packages",
+        "builderCommit": "8ec1d20717",
+        "buildArgs": "随 proot 包构建；PROOT_UNBUNDLE_LOADER=$TERMUX_PREFIX/libexec/proot",
+        "toolchain": "Android clang 17.0.2 (r487747d)"
+      },
+      "status": "source-identified",
+      "residualGap": "同 libproot.so：版本与源码确定，但缺少同版本 deb 副本做逐字节比对。"
+    },
+    "libprootloader32.so": {
+      "license": "GPL-2.0",
+      "sha256": "4c649eb2dce258c9111231940fdbf0474bcf1cd6dd447ad9bdf2898b35a85554",
+      "bytes": 67484,
+      "upstream": {
+        "project": "termux/proot",
+        "version": "5.1.107.91",
+        "versionEvidence": "与 libprootloader.so 同源同构建，为 32 位变体",
+        "sourceUrl": "https://github.com/termux/proot/archive/v5.1.107.91.zip",
+        "sourceSha256": "a7bc2fab34bf9a39073e8291f08a662e848c61a67494e59f5f84f5ca10690128",
+        "sourceSha256Verified": true,
+        "builderRepo": "termux/termux-packages",
+        "builderCommit": "8ec1d20717",
+        "toolchain": "Android clang 17.0.2 (r487747d)"
+      },
+      "status": "source-identified",
+      "residualGap": "同上；且它在 arm64-v8a 目录下作为 PROOT_LOADER_32 备用，是否被实际加载取决于 32 位 guest，本项目未验证该路径。"
+    },
+    "libtalloc.so": {
+      "license": "LGPL-3.0",
+      "licenseNote": "以 talloc 源码 LICENSE 为准（LGPL-3.0）。Termux 的 packages/libtalloc/build.sh 写的是 TERMUX_PKG_LICENSE=\"GPL-3.0\"，与源码 LICENSE 不符，此处不采信 Termux 的标注。",
+      "sha256": "3c9b207c0a6ea2896b7523e03f55d9ab0d9e88baa115d4c32b84058ff4246fbb",
+      "bytes": 31440,
+      "upstream": {
+        "project": "samba talloc",
+        "version": "2.4.3",
+        "versionEvidence": "编译工具链为 clang 19.0.1 (r530567e)。Termux 仓库 libtalloc 只有两个版本节点：2.4.3 (2025-08-29) 与 2.5.0 (2026-10-01)；当前 2.5.0 deb 实测为 clang 22.0.1/21.0.0 构建，与本二进制的 clang 19.0.1 不符，故为 2.4.3 时期的构建。",
+        "sourceUrl": "https://www.samba.org/ftp/talloc/talloc-2.4.3.tar.gz",
+        "sourceSha256": "dc46c40b9f46bb34dd97fe41f548b0e8b247b77a918576733c528e83abd854dd",
+        "sourceSha256Verified": true,
+        "builderRepo": "termux/termux-packages",
+        "builderCommit": "fbc049451e",
+        "builderCommitDate": "2025-08-29",
+        "toolchain": "Android clang 19.0.1 (r530567e)"
+      },
+      "status": "version-inferred",
+      "residualGap": "版本由工具链与 Termux 版本时间线推定，非字节比对（2.4.3 的 deb 已从官方池移除，无法取得副本比对）。源码摘要已核实。"
+    }
+  },
+  "notDistributed": {
+    "libproot_legacy.so": "属于源码树中的 low flavor，该 flavor 从未发布、本项目不分发；由 tools/build-low-proot.py 从 proot v5.1.107.92 源码归档构建。",
+    "libprootloader_legacy.so": "同上，随 low flavor。"
+  },
+  "policy": "新增或替换上表任何二进制时，必须同步更新本文件的 sha256、bytes 与 upstream，并重新运行 python3 tools/check-proot-provenance.py。"
+}

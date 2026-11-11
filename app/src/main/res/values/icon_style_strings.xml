@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="icon_style_applied">已切换为「%1$s」，桌面图标稍后刷新</string>
+    <string name="icon_style_biyu">碧玉</string>
+    <string name="icon_style_cancel">取消</string>
+    <string name="icon_style_current">当前使用</string>
+    <string name="icon_style_default">默认</string>
+    <string name="icon_style_moyu">墨玉</string>
+    <string name="icon_style_subtitle">选择要应用的图标样式</string>
+    <string name="icon_style_tap_to_switch">点击切换</string>
+    <string name="icon_style_tianqing">天青</string>
+    <string name="icon_style_title">应用图标</string>
+    <string name="icon_style_zheshi">赭石</string>
+    <string name="icon_style_zishou">紫绶</string>
+</resources>

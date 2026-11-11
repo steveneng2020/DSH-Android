@@ -1,0 +1,68 @@
+{
+  "schema": 1,
+  "generatedFrom": "docs/releases/build20050190-changes.en.md",
+  "language": "en",
+  "fallbackSource": null,
+  "entries": [
+    {
+      "version": "DSHA v1.4 20261111@0.2.1-rc.2",
+      "build": "build20050190",
+      "title": "Startup fix + faster startup + reasoning-level fitting",
+      "date": "2026-11-11",
+      "bullets": [
+        "Fixed a blank startup page, an unresponsive \"Start DSHA\" button, and occasional stalls on the recovery page after upgrading.",
+        "Faster startup: the plugin-link verification stage dropped from about 64 seconds to 0.4 seconds, removing the timeout that could keep the app from starting.",
+        "Added automatic reasoning-level fitting: declares the reasoning levels a model offers when the profile does not declare them (DSHA never guesses what a third-party model supports — an undeclared model shows no reasoning row). Only adds, never overwrites, and backs up the profile first.",
+        "The application icon is now tappable and offers six color schemes that apply immediately and are remembered.",
+        "Added a native dependency check to the plugin capability summary: reads the ABI and file headers of bundled native modules and warns without blocking installation.",
+        "Added an update log panel: the About page lists entries per version with an expand action.",
+        "Added an upstream comparison: reports whether the code matches upstream, read-only.",
+        "The About page contact entry now points to the maintainer profile and the issue tracker.",
+        "Merged upstream v0.2.1-rc.2 (build190): DSH 0.2.1-rc.2 and mobile UI 3.2.1, experimental virtual display and global confirmation policy, plugin Safe Mode, plugin management and sign-in/LAN/keyboard/background recovery fixes, one-tap backup and export."
+      ]
+    },
+    {
+      "version": "DSHA v1.3 2026-10-27@0.2.1-rc.2",
+      "build": "build190",
+      "title": "Plugin install transaction safety + icon consistency gate",
+      "date": "2026-10-27",
+      "bullets": [
+        "Fixed plugin installs falsely reporting failure on f2fs file systems.",
+        "Added an icon consistency check guarding the icon, alias order, and version numbers hardcoded in UI strings.",
+        "Fixed the update log block rendering as nothing."
+      ]
+    },
+    {
+      "version": "DSHA v1.2 2026-10-26@0.2.1-rc.2",
+      "build": "build190",
+      "title": "Six color schemes finalized + icon fills the canvas",
+      "date": "2026-10-26",
+      "bullets": [
+        "The six color schemes are finalized, correcting the near-duplicate \"Ink Jade\" and renaming \"Snow Jade\" to Sky Blue.",
+        "The kun icon now spans 88.67% of the canvas instead of 80.66%, with no clipping under circular or rounded-rectangle masks.",
+        "Fixed launcher icon background colors that did not match the design."
+      ]
+    },
+    {
+      "version": "DSHA v1.1 2026-10-26@0.2.1-rc.2",
+      "build": "build190",
+      "title": "Kun icon rework + six switchable color schemes",
+      "date": "2026-10-26",
+      "bullets": [
+        "The application icon is now the kun silhouette alone, without the double jade ring or gilded outline. The motif comes from Zhuangzi, \"Free and Easy Wandering\": there is a fish in the Northern Darkness, its name is Kun, and Kun is so vast that no one knows how many thousand li it spans.",
+        "Six color schemes are switchable from \"Settings → About DSHA\" by tapping the icon at the top of the page.",
+        "DSHA is now documented as short for DSH-Android."
+      ]
+    },
+    {
+      "version": "DSHA v1 2026-10-25@0.2.1-rc.2",
+      "build": "build190",
+      "title": "Independent package name (first release)",
+      "date": "2026-10-25",
+      "bullets": [
+        "The application ID is now dsh.android.dev, a separate app from upstream with no shared data and no cross-install; migration uses a backup export/restore.",
+        "The app is named DSHA, short for DSH-Android."
+      ]
+    }
+  ]
+}

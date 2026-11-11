@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="about_changelog_title">更新日记</string>
+    <string name="about_changelog_expand">展开全部 %d 条</string>
+    <string name="about_changelog_unavailable">暂时无法显示更新日记</string>
+    <string name="about_upstream_base">本 fork 基准：%1$s · %2$s</string>
+    <string name="about_upstream_behind">结论：落后 %1$d 个提交</string>
+    <string name="about_upstream_check">检查上游更新</string>
+    <string name="about_upstream_checking">检查中…</string>
+    <string name="about_upstream_collapse">上游对比 ▾</string>
+    <string name="about_upstream_beyond">结论：落后上游至少 %1$d 个提交（GitHub 仅返回最近 %1$d 条提交，基线在此窗口之外）</string>
+    <string name="about_upstream_differs">结论：与上游不一致（基线不在上游历史中）</string>
+    <string name="about_upstream_expand">上游对比 ▸</string>
+    <string name="about_upstream_not_checked">结论：点「检查上游更新」查看</string>
+    <string name="about_upstream_not_checked_value">上游当前：—（未检查）</string>
+    <string name="about_upstream_same">结论：与上游一致</string>
+    <string name="about_upstream_unreadable">结论：无法连接 GitHub，可稍后重试</string>
+    <string name="about_upstream_unreadable_value">读取失败</string>
+    <string name="about_disclaimer">本应用与 DeepSeek 官方无任何关联，非官方产品、未获授权、不受背书。DeepSeek、DeepSeek Harness 等名称归其权利人所有。</string>
+    <string name="about_app_icon_desc">应用图标：点击切换配色</string>
+    <string name="ui2_web_restarted">Web 已重启，请重新进入</string>
+    <string name="ui134_upstream">上游基准</string>
+</resources>

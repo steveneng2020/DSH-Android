@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="icon_style_applied">Switched to %1$s; the home screen icon will refresh shortly</string>
+    <string name="icon_style_biyu">Biyu</string>
+    <string name="icon_style_cancel">Cancel</string>
+    <string name="icon_style_current">In use</string>
+    <string name="icon_style_default">Default</string>
+    <string name="icon_style_moyu">Moyu</string>
+    <string name="icon_style_subtitle">Choose the icon style to apply</string>
+    <string name="icon_style_tap_to_switch">Tap to switch</string>
+    <string name="icon_style_tianqing">Tianqing</string>
+    <string name="icon_style_title">App icon</string>
+    <string name="icon_style_zheshi">Zheshi</string>
+    <string name="icon_style_zishou">Zishou</string>
+</resources>

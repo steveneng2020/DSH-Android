@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="about_changelog_title">Recent updates</string>
+    <string name="about_changelog_expand">Show all %d entries</string>
+    <string name="about_changelog_unavailable">Updates are temporarily unavailable</string>
+    <string name="about_upstream_base">Fork base: %1$s · %2$s</string>
+    <string name="about_upstream_behind">Result: %1$d commit(s) behind upstream</string>
+    <string name="about_upstream_check">Check upstream</string>
+    <string name="about_upstream_checking">Checking…</string>
+    <string name="about_upstream_collapse">Upstream compare ▾</string>
+    <string name="about_upstream_beyond">Result: at least %1$d commit(s) behind upstream (GitHub returns only the latest %1$d commits, so the baseline falls outside that window)</string>
+    <string name="about_upstream_differs">Result: differs from upstream (baseline not found in upstream history)</string>
+    <string name="about_upstream_expand">Upstream compare ▸</string>
+    <string name="about_upstream_not_checked">Result: tap Check upstream to compare</string>
+    <string name="about_upstream_not_checked_value">Upstream: — (not checked)</string>
+    <string name="about_upstream_same">Result: up to date with upstream</string>
+    <string name="about_upstream_unreadable">Result: cannot reach GitHub; try again later</string>
+    <string name="about_upstream_unreadable_value">Read failed</string>
+    <string name="about_disclaimer">This app has no affiliation with DeepSeek. It is not an official product, not authorised and not endorsed. DeepSeek and DeepSeek Harness are trademarks of their respective owners.</string>
+    <string name="about_app_icon_desc">App icon: tap to switch colour</string>
+    <string name="ui2_web_restarted">Web restarted. Open it again.</string>
+    <string name="ui134_upstream">Upstream base</string>
+</resources>

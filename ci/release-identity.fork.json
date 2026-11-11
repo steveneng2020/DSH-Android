@@ -1,0 +1,17 @@
+{
+  "schema": 1,
+  "identity": "fork",
+  "packageName": "dsh.android.dev",
+  "certificateSha256": "814ab1037fb25c781236809c7dffff1a101385ae245b6d5b55b767e44e63622f",
+  "schemes": ["v1", "v2", "v3"],
+  "appName": "DSHA",
+  "keyAlias": "dsha-release",
+  "testSuffix": ".test",
+  "devSuffix": ".dev",
+  "tagPrefix": "v",
+  "apkPrefix": "DSHA",
+  "repository": "steveneng2020/DSH-Android",
+  "ref": "refs/heads/main",
+  "privateRepository": false,
+  "workflow": ".github/workflows/release.yml"
+}

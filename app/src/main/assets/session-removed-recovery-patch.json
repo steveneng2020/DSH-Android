@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "dshVersion": "0.2.1-rc.2",
+  "module": "@deepseek-ai/dsh-api-session-controller/lib/client.js",
+  "patches": [
+    {
+      "before": "\t\t\t\ttry {\n\t\t\t\t\tawait events.open(HISTORY_PAGE_OPTIONS);\n\t\t\t\t\tif (generation !== this.openGeneration || this.events !== events) return;\n\t\t\t\t\tthis.openState = \"open\";\n\t\t\t\t} catch (error) {\n",
+      "after": "\t\t\t\ttry {\n\t\t\t\t\tawait events.open(HISTORY_PAGE_OPTIONS);\n\t\t\t\t\tif (generation !== this.openGeneration || this.events !== events) return;\n\t\t\t\t\tthis.openState = \"open\";\n\t\t\t\t\t/* DSHA_SESSION_REMOVED_RECOVERY_V1：历史流能打开说明宿主仍持有该会话，\n\t\t\t\t\t   之前收到的 api-session/removed 属于陈旧标志（宿主 dispose 后同一 id 又被重新载入）。\n\t\t\t\t\t   不复位会让输入框永久禁用并显示「会话不可用」。 */\n\t\t\t\t\tif (this.removed) this.removed = false;\n\t\t\t\t} catch (error) {\n"
+    },
+    {
+      "before": "\t\t\thandleSessionAdded(summary) {\n\t\t\t\tthis.mergeSummary(summary);\n\t\t\t\tif (!this.disposed && summary.running) this.engagedSessions.add(summary.sessionId);\n\t\t\t\tthis.sessions.get(summary.sessionId)?.handleBlank(this.effectiveBlank(summary));\n",
+      "after": "\t\t\thandleSessionAdded(summary) {\n\t\t\t\tthis.mergeSummary(summary);\n\t\t\t\tif (!this.disposed && summary.running) this.engagedSessions.add(summary.sessionId);\n\t\t\t\t/* DSHA_SESSION_REMOVED_RECOVERY_V1：宿主重新宣告该会话可用即撤销旧的 removed 标志。 */\n\t\t\t\tconst revived = this.sessions.get(summary.sessionId);\n\t\t\t\tif (revived !== void 0 && revived.removed) revived.removed = false;\n\t\t\t\tthis.sessions.get(summary.sessionId)?.handleBlank(this.effectiveBlank(summary));\n"
+    }
+  ]
+}
