@@ -19,7 +19,8 @@ def build_identity(root):
 
 def update(root, check=False):
     code, version = build_identity(root)
-    heading = f'# DSHA {version} / build{code}'
+    # fork：标题分隔符统一用 '.'（与 App 内 '·' 以外的所有位置保持一致），不再用 '/'。
+    heading = f'# DSHA {version}. build{code}'
     for locale in LANGUAGES:
         folder = RESOURCE_FOLDERS[locale].replace('values', 'raw', 1)
         source = root / f'docs/releases/build{code}-changes.{locale}.md'

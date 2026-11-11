@@ -16,7 +16,8 @@ public final class AboutDialog {
 
   /** 本 fork 维护者（GitHub 用户名）；关于页的「交流与反馈」指向其主页。 */
   public static final String MAINTAINER = "steveneng2020";
-  public static final String QQ_GROUP = "975836806";
+  /** 本 fork 的联系邮箱（原 QQ 群已停用，改用邮箱）。 */
+  public static final String CONTACT_EMAIL = "steveneng@163.com";
 
   private AboutDialog() {}
 
@@ -30,7 +31,7 @@ public final class AboutDialog {
         android.view.LayoutInflater.from(ctx)
             .inflate(com.deepseekharness.app.R.layout.dialog_about, null);
     ((android.widget.TextView) content.findViewById(com.deepseekharness.app.R.id.about_version))
-        .setText(com.deepseekharness.app.util.UiText.format("DSHA v%s", version));
+        .setText(com.deepseekharness.app.util.UiText.format("DSHA %s", version));
     android.widget.ImageView icon =
         content.findViewById(com.deepseekharness.app.R.id.about_app_icon);
     if (icon != null) {
@@ -47,7 +48,7 @@ public final class AboutDialog {
     repository.setText(Uri.parse(GITHUB_URL).getPath().substring(1));
     android.widget.TextView community =
         content.findViewById(com.deepseekharness.app.R.id.about_community);
-    community.setText(QQ_GROUP);
+    community.setText(CONTACT_EMAIL);
     AlertDialog dialog = new DshaDialogBuilder(ctx).setView(content).create();
     content
         .findViewById(com.deepseekharness.app.R.id.about_close)
@@ -57,7 +58,13 @@ public final class AboutDialog {
         .setOnClickListener(v -> openBrowser(ctx, GITHUB_URL));
     content
         .findViewById(com.deepseekharness.app.R.id.about_qq)
-        .setOnClickListener(v -> openQQGroup(ctx));
+        .setOnClickListener(v -> openEmail(ctx, CONTACT_EMAIL));
+    // fork：关于对话框内联更新日记（与关于页一致，按版本分块）。
+    android.view.View changelogBox = content.findViewById(com.deepseekharness.app.R.id.about_changelog_box);
+    android.view.ViewGroup changelogList = content.findViewById(com.deepseekharness.app.R.id.about_changelog_list);
+    if (changelogBox != null && changelogList != null) {
+      ChangelogPanel.populateInto(ctx, changelogBox, changelogList, null);
+    }
     dialog.show();
     return dialog;
   }
@@ -75,21 +82,18 @@ public final class AboutDialog {
     }
   }
 
-  public static void openQQGroup(Context ctx) {
+  /** 联系邮箱入口：交给系统邮件客户端；没有可用客户端时退化为「请手动发信」提示。 */
+  public static void openEmail(Context ctx, String address) {
     try {
       ctx.startActivity(
           new Intent(
-                  Intent.ACTION_VIEW,
-                  Uri.parse(
-                      "mqqapi://card/show_pslcard?src_type=internal&version=1"
-                          + "&uin="
-                          + QQ_GROUP
-                          + "&card_type=group"))
+                  Intent.ACTION_SENDTO,
+                  Uri.parse("mailto:" + Uri.encode(address)))
               .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
     } catch (Exception e) {
       Toast.makeText(
               ctx,
-              com.deepseekharness.app.util.UiText.format("打不开 QQ，请手动搜索群号：%s", QQ_GROUP),
+              com.deepseekharness.app.util.UiText.format("没有可用的邮件应用，请手动发信至：%s", address),
               Toast.LENGTH_SHORT)
           .show();
     }

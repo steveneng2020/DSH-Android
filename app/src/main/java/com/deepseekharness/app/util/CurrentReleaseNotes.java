@@ -26,7 +26,7 @@ public final class CurrentReleaseNotes {
     if (notes == null) return false;
     int end = notes.indexOf('\n');
     String heading = (end < 0 ? notes : notes.substring(0, end)).trim();
-    return heading.equals("# DSHA " + bundledVersion(versionName) + " / build" + versionCode);
+    return heading.equals("# DSHA " + bundledVersion(versionName) + ". build" + versionCode);
   }
 
   public static String render(String versionName, int versionCode, String notes, boolean english) {
@@ -36,7 +36,7 @@ public final class CurrentReleaseNotes {
   public static String render(String versionName, int versionCode, String notes, String language) {
     if (!UiLanguagePreference.isSupportedLanguage(language))
       throw new IllegalArgumentException("UI_LANGUAGE");
-    String title = "DSHA " + versionName + " / build" + versionCode;
+    String title = "DSHA " + versionName + ". build" + versionCode;
     if (!matches(versionName, versionCode, notes))
       return title
           + "\n\n"

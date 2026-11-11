@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
     <string name="about_close_button" formatted="false">"關閉"</string>
-    <string name="about_community" formatted="false">"QQ 交流群"</string>
+    <string name="about_community" formatted="false">"聯絡郵箱"</string>
     <string name="about_tagline" formatted="false">"DSHA 安卓啟動器"</string>
     <string name="adb_pairing_service_label" formatted="false">"ADB 無線配對"</string>
     <string name="alpha_no_seccomp" formatted="false">"關閉 seccomp 加速"</string>

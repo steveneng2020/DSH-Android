@@ -1,12 +1,16 @@
-# DSHA v1.4 20261111@0.2.2-rc.1 / build20050357
+# DSHA v1.4 20261111@0.2.2-rc.1. build20050357
 
-Haec aedificatio super basim DSHA upstream 0.2.2 (build357) refecta est, DSH 0.2.2-rc.1 inclusa; basis Ubuntu 10 manet.
+Haec aedificatio super upstream DSHA 0.2.2 (upstream build357) reconstructa est, DSH 0.2.2-rc.1 et Ubuntu basis 10 continens.
 
-- Basis renovata: ab upstream 0.2.1-rc.2 (build190) ad 0.2.2 (build357), inter quae interfacies mobilis v5, pagina propria auctoritatis facultatum machinae, et reparatio obstructionis registrationis pluginorum per tempora maintenance.
-- Una varietas: linea compatibilitatis et GeckoView sublatae sunt; sola Standard distribuitur (Android 11 vel superior, arm64-v8a, WebView systematis).
-- Propria fork retinita: icon cliccabilis cum sex schematibus colorum, tabula diarii renovationum, comparatio cum upstream, accommodatio gradus ratiocinationis automatica, inspectio dependentiarum nativarum pluginorum.
-- Identitas editionis independens: nomen fasciculi `dsh.android.dev` et certificatum proprium, cum upstream `dsh.android.client` non commutanda; installatio super vetus idem signum requirit.
-- Fons renovationum manet `updates.json` huius repositorii; APK e Releases huius repositorii praebentur.
-
-`versionCode` huius aedificationis est `20050357`. Qui vetus fasciculum habent hoc in «renovationes inspicere» non videbunt (maior code necessarius est), sed manualiter deponere debent.
-Examinationes programmatis et probatio in machina ad tesseras huius circuitus pertinent, nec matricem machinarum completam probant.
+- Pagina initialis vacua post renovationem emendata, et mandatum «DSHA incipere» quod non respondebat, et morae in pagina restitutionis.
+- Morae perpetuae in «Web et mandata terminalis sistere» emendatae: claustrum sistendi procuratorem continentis quem applicatio ipsa excitat non agnoscebat et pro incognito processu habebat.
+- Status «identitas incognita» post APK renovatam vel vetustiorem redditam emendatus: nova regula substitutionem fasciculi pro certo exitu habet et ad paginam institutionis et reparationis ducit.
+- Accommodatio automatica gradus ratiocinandi addita: exempla quae gradum non declarant declarationem accipiunt (DSHA gradus quae exempla aliena sustineant non conicit; sine declaratione gradus non ostenditur). Solum addit, priusquam scribat fasciculum configurationis servat.
+- Icon applicatonis tangi potest ut sex colores mutentur; mutatio statim valet et memoria tenetur. Icon paginae «De» et icon dialogi ex eodem fonte sunt; tangere selectrum aperit, et icon totam aream implet.
+- In indiciis facultatum pluginae nativa dependentia inspicitur: ABI et caput fasciculi modulorum nativorum leguntur tantum, monetur sed installatio non prohibetur.
+- Tabula diarii renovationum addita: pagina «De» versiones per sectiones ostendit et omnes expandi possunt; dialogus «De DSHA» idem diarium continet.
+- Comparatio cum upstream addita: ostendit num codex ab upstream differat, legitur tantum, nunquam scribitur.
+- Aditus communicationis in epistulam steveneng@163.com mutatus; vinculum «editiones in navigatro videre» et canales stable atque preview ad hoc repositorium monstrant, non ad paginam editionum upstream.
+- Identitas editionis propria manet: nomen fasciculi dsh.android.dev et certificatum proprium, cum upstream dsh.android.client non commutabile; ut superscribatur eadem signatura necessaria est.
+- Una varietas: linea compatibilitatis et GeckoView sublatae, solum Standard editur (Android 11+, arm64-v8a, WebView systematis).
+- Cum upstream DSHA 0.2.2 (upstream build357) coniunctum, DSH 0.2.2-rc.1 et Ubuntu basi 10 incluso: interfacies mobilis v5, pagina separata auctoritatum facultatum instrumenti, emendatio haesitationis registrationis pluginarum per sustentationem, et omnes commissiones upstream post coniunctionem priorem (upstream v0.2.1-rc.2, upstream build190). Ramus super commissione vera upstream (5e2dca92, 2026-11-11) reconstructus est, ergo renovationes upstream deinceps directo coniungi possunt.

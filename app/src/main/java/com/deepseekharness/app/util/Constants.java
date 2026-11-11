@@ -11,8 +11,14 @@ public final class Constants {
   /** SharedPreferences 文件名（全 App 统一） */
   public static final String PREFS = "deepseekharness";
 
-  /** 当前维护仓库；作者与历史报告链接分别保持原来源。 */
-  public static final String REPOSITORY_URL = "https://github.com/DSH-APP/DSHA";
+  /**
+   * 当前维护仓库 = 本 fork 自己。更新页「在浏览器查看发布页」、稳定版/预览版链接
+   * 以及配置页的仓库入口都用它，指向上游会让用户跳到上游发布页（那里没有本 fork 的包）。
+   * 由 BuildConfig.FORK_REPOSITORY_SLUG 派生，与 build.gradle 单一真源一致。
+   */
+  public static final String REPOSITORY_URL =
+      "https://github.com/"
+          + com.deepseekharness.app.BuildConfig.FORK_REPOSITORY_SLUG;
   /** 上游仓库地址（本 fork 新增）：关于页与「上游对比」用它显示跟随情况。 */
   public static final String UPSTREAM_REPOSITORY_URL = "https://github.com/DSH-APP/DSHA";
 

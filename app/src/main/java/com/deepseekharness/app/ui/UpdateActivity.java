@@ -243,9 +243,9 @@ public final class UpdateActivity extends AppCompatActivity {
                   android.content.ClipData.newPlainText(
                       "DSHA",
                       BuildConfig.VERSION_NAME
-                          + " / build"
+                          + " • build"
                           + BuildConfig.VERSION_CODE
-                          + " / DSH "
+                          + " • DSH "
                           + com.deepseekharness.app.util.Constants.DSH_VERSION));
               Toast.makeText(
                       this, com.deepseekharness.app.util.UiText.text("已复制版本信息"), Toast.LENGTH_SHORT)

@@ -26,6 +26,12 @@ public final class AboutFragment extends Fragment {
     android.widget.FrameLayout emblem = new android.widget.FrameLayout(requireContext());
     android.widget.ImageView mark = new android.widget.ImageView(requireContext());
     // fork：图标随当前配色变化，点击可切换（上游是固定装饰图）。
+    // 图标要「充满」画布：PREVIEWS 里的图自带圆角底，再套 bg_ui2_mark + padding
+    // 会把它压小一圈。故改为 CENTER_CROP + 零内边距 + 圆角裁剪，尺寸 80dp。
+    mark.setScaleType(android.widget.ImageView.ScaleType.CENTER_CROP);
+    mark.setClipToOutline(true);
+    mark.setPadding(0, 0, 0, 0);
+    mark.setContentDescription(UiText.text("应用图标：点击切换配色"));
     // refreshIcon 由切换器回调，切完立刻刷新本页预览，不必退出重进。
     Runnable refreshIcon =
         () -> mark.setImageResource(IconSwitcher.PREVIEWS[IconSwitcher.current(requireContext())]);
@@ -33,11 +39,9 @@ public final class AboutFragment extends Fragment {
     mark.setClickable(true);
     mark.setFocusable(true);
     mark.setOnClickListener(v -> IconPickerDialog.show(requireContext(), refreshIcon).show());
-    mark.setBackgroundResource(R.drawable.bg_ui2_mark);
-    mark.setPadding(ui.dp(14), ui.dp(14), ui.dp(14), ui.dp(14));
     emblem.addView(
-        mark, new android.widget.FrameLayout.LayoutParams(ui.dp(64), ui.dp(64), Gravity.CENTER));
-    ui.content.addView(emblem, new LinearLayout.LayoutParams(-1, ui.dp(84)));
+        mark, new android.widget.FrameLayout.LayoutParams(ui.dp(80), ui.dp(80), Gravity.CENTER));
+    ui.content.addView(emblem, new LinearLayout.LayoutParams(-1, ui.dp(100)));
     TextView brand = ui.text("DSHA", 30, R.color.text);
     brand.setTypeface(null, android.graphics.Typeface.BOLD);
     brand.setGravity(Gravity.CENTER);
@@ -47,7 +51,7 @@ public final class AboutFragment extends Fragment {
         ui.text(
             "DeepSeek Harness for Android\n"
                 + BuildConfig.VERSION_NAME
-                + " · "
+                + " • build"
                 + BuildConfig.VERSION_CODE,
             12,
             R.color.text_secondary);

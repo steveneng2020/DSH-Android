@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
     <string name="about_close_button" formatted="false">"Fechar"</string>
-    <string name="about_community" formatted="false">"Comunidade QQ"</string>
+    <string name="about_community" formatted="false">"E-mail de contato"</string>
     <string name="about_tagline" formatted="false">"Lançador DSHA para Android"</string>
     <string name="adb_pairing_service_label" formatted="false">"Pareamento ADB sem fio"</string>
     <string name="alpha_no_seccomp" formatted="false">"Desativar aceleração seccomp"</string>

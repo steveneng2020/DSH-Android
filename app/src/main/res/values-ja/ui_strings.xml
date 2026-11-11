@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
     <string name="about_close_button" formatted="false">"閉じる"</string>
-    <string name="about_community" formatted="false">"QQ コミュニティ"</string>
+    <string name="about_community" formatted="false">"連絡先メール"</string>
     <string name="about_tagline" formatted="false">"DSHA Android ランチャー"</string>
     <string name="adb_pairing_service_label" formatted="false">"ADB のワイヤレス ペア設定"</string>
     <string name="alpha_no_seccomp" formatted="false">"seccomp 高速化を無効にする"</string>

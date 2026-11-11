@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
     <string name="about_close_button" formatted="false">"إغلاق"</string>
-    <string name="about_community" formatted="false">"مجتمع QQ"</string>
+    <string name="about_community" formatted="false">"البريد الإلكتروني للتواصل"</string>
     <string name="about_tagline" formatted="false">"مشغّل DSHA لأندرويد"</string>
     <string name="adb_pairing_service_label" formatted="false">"إقران ADB لاسلكيًا"</string>
     <string name="alpha_no_seccomp" formatted="false">"تعطيل تسريع seccomp"</string>

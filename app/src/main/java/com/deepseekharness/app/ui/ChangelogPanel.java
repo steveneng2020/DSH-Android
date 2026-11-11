@@ -109,7 +109,9 @@ public final class ChangelogPanel {
   static String versionLine(JSONObject entry) {
     String version = entry.optString("version", "");
     String build = entry.optString("build", "");
-    return build.isEmpty() ? version : version + " · " + build;
+    // 分隔符用 U+2022（•）而不是 U+00B7（·）：后者在系统默认中文字体里基线偏低，
+    // 与两侧数字并排时看起来「掉下去」。• 垂直居中，两端对齐更好。
+    return build.isEmpty() ? version : version + " • " + build;
   }
 
   private static void render(Context context, ViewGroup list, JSONArray entries, int count) {

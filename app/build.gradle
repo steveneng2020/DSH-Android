@@ -98,7 +98,7 @@ android {
         buildConfigField 'String', 'FORK_REPOSITORY_SLUG', '"steveneng2020/DSH-Android"'
         // 本 fork 实际同步到的上游提交（v0.2.2 / build357）
         buildConfigField 'String', 'UPSTREAM_BASE_COMMIT', '"5e2dca92864eca21cf7cbcec35af5a7082ca9b0a"'
-        buildConfigField 'String', 'UPSTREAM_BASE_DATE', '"2026-11-10"'
+        buildConfigField 'String', 'UPSTREAM_BASE_DATE', '"2026-11-11"'
         // low flavor 已跟随上游删除；保留 false 常量以兼容既有判断分支。
         buildConfigField 'boolean', 'LOW_ANDROID', 'false'
         // 上岛能力已并入正式包；不再有独立上岛包名或独立显示名。

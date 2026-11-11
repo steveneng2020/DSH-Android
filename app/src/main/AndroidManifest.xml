@@ -79,6 +79,7 @@
 
         <activity android:name=".ui.BrowserOriginRestoreActivity" android:exported="false" />
         <activity android:name=".ui.CommunityActivity" android:exported="false" />
+        <activity android:name=".ui.OnboardingPrepareActivity" android:exported="false" />
 
         <activity android:name=".ui.AccessibilitySetupActivity" android:exported="false" />
         <activity
@@ -132,6 +133,7 @@
         <service android:name=".transfer.DownloadService" android:exported="false" android:foregroundServiceType="dataSync" />
           <activity android:name=".ui.StorageHelpActivity" android:exported="false" />
           <activity android:name=".ui.ColdSetupSpeedActivity" android:exported="false" />
+        <activity android:name=".ui.SkillsActivity" android:exported="false" />
         <activity android:name=".ui.ThemeActivity" android:exported="false" />
         <activity android:name=".ui.RetainedDataActivity" android:exported="false" android:windowSoftInputMode="adjustResize" />
         <service android:name=".backup.PostUpgradeCleanupService" android:permission="android.permission.BIND_JOB_SERVICE" android:exported="false" />
@@ -190,6 +192,11 @@
              不用 singleTask：它在同一任务里会清掉压在上面的 Main。唯一宿主由
              BrowserTasks.forwardToLiveBrowser 保证；excludeFromRecents 只对画中画等以网页为根的任务生效，
              Main 所在任务由 BrowserTasks.reconcileRecents 显式显示。 -->
+        <activity
+            android:name=".ui.WelcomeActivity"
+            android:exported="false"
+            android:theme="@style/Theme.DeepseekHarness" />
+
         <activity
             android:name=".ui.WebPreviewActivity"
             android:exported="false"

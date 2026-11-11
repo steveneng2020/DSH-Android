@@ -1,12 +1,16 @@
-# DSHA v1.4 20261111@0.2.2-rc.1 / build20050357
+# DSHA v1.4 20261111@0.2.2-rc.1. build20050357
 
-Cette build est reconstruite sur la base DSHA upstream 0.2.2 (build357) et embarque DSH 0.2.2-rc.1 ; l'environnement de base Ubuntu reste 10.
+Cette compilation est reconstruite sur l'upstream DSHA 0.2.2 (upstream build357), avec DSH 0.2.2-rc.1 sur la base Ubuntu 10.
 
-- Mise à niveau de la base : d'upstream 0.2.1-rc.2 (build190) vers 0.2.2 (build357), avec l'interface mobile v5, une page autonome d'autorisation des capacités de l'appareil et le correctif de blocage d'enregistrement des plugins pendant la maintenance.
-- Variante unique : la ligne de compatibilité et GeckoView sont supprimés ; seule Standard est distribuée (Android 11+, arm64-v8a, WebView système).
-- Fonctions propres au fork conservées : icône cliquable avec six jeux de couleurs, panneau du journal des mises à jour, comparaison avec upstream, ajustement automatique du niveau de raisonnement, vérification des dépendances natives des plugins.
-- Identité de publication indépendante : paquet `dsh.android.dev` et certificat propre, non interchangeables avec upstream `dsh.android.client` ; l'installation par-dessus exige la même signature.
-- La source de mise à jour reste `updates.json` de ce dépôt ; les APK sont servis par les Releases de ce dépôt.
-
-Le `versionCode` de cette build est `20050357`. Les utilisateurs d'une version antérieure ne la verront pas dans « rechercher des mises à jour » (un versionCode supérieur est requis) et doivent l'installer manuellement.
-Les vérifications logicielles et la recette sur appareil se limitent au reçu de cette campagne et ne prouvent pas une matrice complète d'appareils.
+- Correction de la page de démarrage vide après une mise à jour, du bouton « Démarrer DSHA » sans réaction et de blocages occasionnels sur la page de récupération.
+- Correction du blocage définitif de la maintenance sur « arrêter Web et les tâches de terminal », où « Réessayer » restait sans effet : la barrière d'arrêt ne reconnaissait pas le superviseur de conteneur lancé par l'application elle-même et le traitait comme un processus non identifié.
+- Correction de l'état « identité inconnue » qui empêchait le démarrage après une mise à jour ou un retour à une version antérieure de l'APK : un critère de changement de build traite désormais le remplacement du paquet comme une expiration certaine et mène à la page d'installation et de réparation.
+- Ajout de l'adaptation automatique du niveau de raisonnement : les modèles qui n'en déclarent pas reçoivent la déclaration (DSHA ne devine pas quels niveaux un modèle tiers prend en charge ; sans déclaration, le niveau n'est pas affiché). Ajout uniquement, avec sauvegarde automatique de la configuration avant écriture.
+- L'icône de l'application se touche pour changer parmi six palettes ; le changement s'applique immédiatement et est mémorisé. L'icône de la page « À propos » et celle de la boîte de dialogue partagent la même source, un appui ouvre le sélecteur et l'icône remplit la zone.
+- Les indications de capacités des plugins gagnent une vérification des dépendances natives : lecture seule de l'ABI et de l'en-tête des modules natifs fournis, avec un avertissement qui ne bloque pas l'installation.
+- Ajout du panneau de journal des mises à jour : la page « À propos » affiche les versions par blocs, tout peut être déplié ; la boîte de dialogue « À propos de DSHA » intègre le même journal.
+- Ajout de la comparaison avec l'upstream : indique si le code diffère de l'upstream, en lecture seule, jamais réécrit.
+- L'entrée de contact de la page « À propos » devient l'adresse steveneng@163.com ; le lien « voir les versions dans le navigateur » et les canaux stable et preview pointent vers ce dépôt, plus vers la page de versions de l'upstream.
+- L'identité de publication reste indépendante : paquet dsh.android.dev et certificat propre, non interchangeable avec l'upstream dsh.android.client ; l'installation par-dessus exige la même signature.
+- Variante unique : la ligne de compatibilité et GeckoView sont supprimés, seul Standard est publié (Android 11+, arm64-v8a, WebView système).
+- Fusion avec l'upstream DSHA 0.2.2 (upstream build357), avec DSH 0.2.2-rc.1 et la base Ubuntu 10 : interface mobile v5, page autonome d'autorisation des capacités de l'appareil, correction du blocage d'enregistrement des plugins pendant la maintenance et tous les commits de l'upstream depuis la fusion précédente (upstream v0.2.1-rc.2, upstream build190). La branche a été reconstruite sur un commit réel de l'upstream (5e2dca92, 2026-11-11), les prochaines mises à jour se fusionnent donc directement.

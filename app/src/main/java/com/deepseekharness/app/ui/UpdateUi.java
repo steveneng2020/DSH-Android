@@ -154,7 +154,7 @@ final class UpdateUi {
   }
 
   static String releaseMeta(UpdatePolicy.Release release) {
-    return "build" + release.versionCode + " · " + mib(release.bytes);
+    return "build" + release.versionCode + " • " + mib(release.bytes);
   }
 
   /** 候选卡（手机）与右栏（平板横屏）共用：标题、build·大小、更新记录；没有候选时右栏显示空态。 */

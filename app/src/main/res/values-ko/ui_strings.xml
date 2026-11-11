@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
     <string name="about_close_button" formatted="false">"닫기"</string>
-    <string name="about_community" formatted="false">"QQ 커뮤니티"</string>
+    <string name="about_community" formatted="false">"연락 이메일"</string>
     <string name="about_tagline" formatted="false">"DSHA Android 런처"</string>
     <string name="adb_pairing_service_label" formatted="false">"무선 ADB 페어링"</string>
     <string name="alpha_no_seccomp" formatted="false">"seccomp 가속 사용 안 함"</string>

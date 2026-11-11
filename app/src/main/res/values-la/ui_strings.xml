@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
     <string name="about_close_button" formatted="false">"Claude"</string>
-    <string name="about_community" formatted="false">"Communitas QQ"</string>
+    <string name="about_community" formatted="false">"Inscriptio electronica"</string>
     <string name="about_tagline" formatted="false">"DSHA deductor Android"</string>
     <string name="adb_pairing_service_label" formatted="false">"Coniunctio ADB"</string>
     <string name="alpha_no_seccomp" formatted="false">"Accelerationem seccomp claude"</string>

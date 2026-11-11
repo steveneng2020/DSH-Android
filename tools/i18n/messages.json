@@ -329,8 +329,8 @@
   },
   {
     "id": "m0036",
-    "zh": "GitHub 仓库 · QQ 交流群 · 开源协议",
-    "en": "GitHub · QQ community · License",
+    "zh": "GitHub 仓库 · 联系邮箱 · 开源协议",
+    "en": "GitHub repository · Contact email · Open-source licence",
     "files": [
       "app/src/main/res/layout/fragment_settings.xml"
     ]
@@ -2260,8 +2260,8 @@
   },
   {
     "id": "m0275",
-    "zh": "QQ 群",
-    "en": "QQ group",
+    "zh": "邮箱",
+    "en": "Email",
     "files": [
       "app/src/main/java/com/deepseekharness/app/ui/AboutDialog.java"
     ]
@@ -3841,8 +3841,8 @@
   },
   {
     "id": "m0469",
-    "zh": "打不开 QQ，请手动搜索群号：",
-    "en": "Could not open QQ. Search for group number: ",
+    "zh": "没有可用的邮件应用，请手动发信至：",
+    "en": "No email app available; please write to ",
     "files": [
       "app/src/main/java/com/deepseekharness/app/ui/AboutDialog.java"
     ]
@@ -5972,8 +5972,8 @@
   },
   {
     "id": "m0734",
-    "zh": "🐧 QQ 交流群：",
-    "en": "🐧 QQ community: ",
+    "zh": "✉️ 联系邮箱：",
+    "en": "✉️ Contact email: ",
     "files": [
       "app/src/main/java/com/deepseekharness/app/ui/AboutDialog.java"
     ]
@@ -16871,8 +16871,8 @@
   },
   {
     "id": "about_community",
-    "zh": "QQ 交流群",
-    "en": "QQ community",
+    "zh": "联系邮箱",
+    "en": "Contact email",
     "files": [
       "app/src/main/res/layout/fragment_device_grants.xml"
     ]
@@ -27715,8 +27715,8 @@
     "id": "build156_f00d2b410a6b"
   },
   {
-    "zh": "打不开 QQ，请手动搜索群号：%s",
-    "en": "Could not open QQ. Search for group number: %s",
+    "zh": "没有可用的邮件应用，请手动发信至：%s",
+    "en": "No email app available; please write to %s",
     "uiFormat": true,
     "files": [
       "app/src/main/java/com/deepseekharness/app/ui/AboutDialog.java"
@@ -28237,8 +28237,8 @@
     "id": "build156_7c95225bace9"
   },
   {
-    "zh": "QQ群 %s · 问题反馈",
-    "en": "QQ group %s · Issue tracker",
+    "zh": "邮箱 %s · 问题反馈",
+    "en": "Email %s · Report an issue",
     "uiFormat": true,
     "files": [
       "app/src/main/java/com/deepseekharness/app/ui/AboutFragment.java"

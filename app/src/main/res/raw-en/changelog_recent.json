@@ -5,49 +5,38 @@
   "fallbackSource": null,
   "entries": [
     {
-      "version": "DSHA v1.5 20261111@0.2.2-rc.1",
+      "version": "DSHA v1.4 20261111@0.2.2-rc.1",
       "build": "build20050357",
-      "title": "Rebuilt on upstream 0.2.2 with all fork features retained",
+      "title": "Startup fixes + faster startup + reasoning-effort adaptation",
       "date": "2026-11-11",
       "bullets": [
-        "Base upgrade: from upstream 0.2.1-rc.2 (build190) to 0.2.2 (build357), including mobile UI v5, a standalone device-capability authorisation page, and the maintenance-time plugin registration deadlock fix.",
-        "Single variant: the compatibility line and GeckoView are removed; only Standard ships (Android 11+, arm64-v8a, system WebView).",
-        "Fork features are retained: switchable launcher icon with six palettes, the changelog panel, upstream comparison, automatic reasoning-effort adaptation, and the plugin native-dependency precheck.",
+        "Fixed the blank startup page after upgrades, the unresponsive \"Start DSHA\" button, and occasional stalls on the recovery page.",
+        "Fixed maintenance getting permanently stuck on \"stop Web and terminal tasks\", where retrying did nothing either: the stop barrier could not recognise the container supervisor this app launches itself, treated it as an unidentified process and never released the barrier.",
+        "Fixed old instances staying permanently at \"identity unknown\" and refusing to start after an APK upgrade or downgrade: a superseded-build check now recognises a package swap as a definite expiry and routes into the install-and-repair page instead of hanging.",
+        "Added automatic reasoning-effort adaptation: models that declare no reasoning effort get the declaration filled in (DSHA does not guess which levels a third-party model supports; undeclared means no reasoning level is shown). Additive only, with an automatic config backup before writing.",
+        "The launcher icon is tappable to switch between six palettes; the change takes effect immediately and is remembered. The About page and About dialog share the same icon source, so tapping either opens the switcher, and the icon now fills its canvas.",
+        "Plugin capability hints gained a native dependency precheck: a read-only inspection of the ABI and file header of bundled native modules, warned about but never blocking installation.",
+        "Added the changelog panel: the About page shows releases in blocks and can expand all of them; the About DSHA dialog embeds the same changelog inline.",
+        "Added upstream comparison: shows whether the code differs from upstream, read-only and never written back.",
+        "The About page community entry now uses the contact email steveneng@163.com; the update page's \"view releases in browser\" and its stable and preview links point at this repository instead of the upstream release page.",
         "Release identity stays independent: package dsh.android.dev with its own release certificate, not interchangeable with upstream dsh.android.client; in-place upgrade requires the same signature.",
-        "The update source still points at this repository's updates.json, with APKs served from this repository's Releases."
-      ]
-    },
-    {
-      "version": "DSHA v1.4 20261111@0.2.1-rc.2",
-      "build": "build20050190",
-      "title": "Startup fix + faster startup + reasoning-level fitting",
-      "date": "2026-11-11",
-      "bullets": [
-        "Fixed a blank startup page, an unresponsive \"Start DSHA\" button, and occasional stalls on the recovery page after upgrading.",
-        "Faster startup: the plugin-link verification stage dropped from about 64 seconds to 0.4 seconds, removing the timeout that could keep the app from starting.",
-        "Added automatic reasoning-level fitting: declares the reasoning levels a model offers when the profile does not declare them (DSHA never guesses what a third-party model supports — an undeclared model shows no reasoning row). Only adds, never overwrites, and backs up the profile first.",
-        "The application icon is now tappable and offers six color schemes that apply immediately and are remembered.",
-        "Added a native dependency check to the plugin capability summary: reads the ABI and file headers of bundled native modules and warns without blocking installation.",
-        "Added an update log panel: the About page lists entries per version with an expand action.",
-        "Added an upstream comparison: reports whether the code matches upstream, read-only.",
-        "The About page contact entry now points to the maintainer profile and the issue tracker.",
-        "Merged upstream v0.2.1-rc.2 (build190): DSH 0.2.1-rc.2 and mobile UI 3.2.1, experimental virtual display and global confirmation policy, plugin Safe Mode, plugin management and sign-in/LAN/keyboard/background recovery fixes, one-tap backup and export."
+        "Single variant: the compatibility line and GeckoView are removed; only Standard ships (Android 11+, arm64-v8a, system WebView).",
+        "Merged upstream DSHA 0.2.2 (upstream build357), bundling DSH 0.2.2-rc.1 on Ubuntu base 10: mobile UI v5, a standalone device-capability authorisation page, the maintenance-time plugin registration deadlock fix, and every upstream commit since the previous merge (upstream v0.2.1-rc.2, upstream build190). The branch was rebuilt on a real upstream commit (5e2dca92, 2026-11-11), so future upstream updates merge directly instead of being force-fitted."
       ]
     },
     {
       "version": "DSHA v1.3 2026-10-27@0.2.1-rc.2",
-      "build": "build190",
-      "title": "Plugin install transaction safety + icon consistency gate",
+      "build": "build20040190",
+      "title": "Plugin install transaction safety",
       "date": "2026-10-27",
       "bullets": [
         "Fixed plugin installs falsely reporting failure on f2fs file systems.",
-        "Added an icon consistency check guarding the icon, alias order, and version numbers hardcoded in UI strings.",
         "Fixed the update log block rendering as nothing."
       ]
     },
     {
       "version": "DSHA v1.2 2026-10-26@0.2.1-rc.2",
-      "build": "build190",
+      "build": "build20030190",
       "title": "Six color schemes finalized + icon fills the canvas",
       "date": "2026-10-26",
       "bullets": [
@@ -58,7 +47,7 @@
     },
     {
       "version": "DSHA v1.1 2026-10-26@0.2.1-rc.2",
-      "build": "build190",
+      "build": "build20020190",
       "title": "Kun icon rework + six switchable color schemes",
       "date": "2026-10-26",
       "bullets": [
@@ -69,7 +58,7 @@
     },
     {
       "version": "DSHA v1 2026-10-25@0.2.1-rc.2",
-      "build": "build190",
+      "build": "build20010190",
       "title": "Independent package name (first release)",
       "date": "2026-10-25",
       "bullets": [
