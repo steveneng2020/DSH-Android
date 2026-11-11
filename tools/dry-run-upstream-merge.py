@@ -45,6 +45,16 @@ def run(args, cwd=ROOT, check=False):
 
 
 def prepare():
+    # T19 / CONSTRAINTS-REGISTER §12 第 18 条：本脚本的 graft 手法只是为
+    # 「merge-base 已为空」的旧分支做抢救性预演。当前分支祖先链完好时用它，
+    # 会让读者误以为需要伪造祖先，反而掩盖真实的拓扑状态。故先断言。
+    real = run(['git', 'merge-base', 'HEAD', UPSTREAM_REF]).stdout.strip()
+    if real:
+        print('REFUSE 本分支祖先链完好（merge-base=%s）。' % real[:12])
+        print('       不需要 graft 预演 —— 请改用 CONSTRAINTS-REGISTER §12 18.7 的')
+        print('       worktree 只读预演（git worktree add --detach + git merge --no-commit）。')
+        print('       本脚本仅为 merge-base 为空的旧分支保留，见 T19 判据 ⑥。')
+        return 2
     # 已存在则先清
     run(['git', 'replace', '--delete', FORK_ROOT])
     status = run(['git', 'replace', '--graft', FORK_ROOT, UPSTREAM_PARENT])
