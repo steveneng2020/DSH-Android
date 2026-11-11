@@ -45,8 +45,7 @@ public final class UpdatePolicy {
       return versionCode > 0
           && minSdk >= 23
           && minSdk <= 100
-          && version != null
-          && version.matches("[A-Za-z0-9][A-Za-z0-9._+-]{0,127}")
+          && versionNameValid(version)
           && (STABLE.equals(channel) || PREVIEW.equals(channel))
           && ("standard".equals(flavor) || "low".equals(flavor))
           && "arm64-v8a".equals(abi)
@@ -57,6 +56,60 @@ public final class UpdatePolicy {
           && bytes > 0
           && bytes <= 1024L * 1024 * 1024;
     }
+  }
+
+  /**
+   * 版本名是否可接受。
+   *
+   * <p><b>为什么不能沿用上游那条正则</b>：上游 {@code valid()} 用的是
+   * {@code [A-Za-z0-9][A-Za-z0-9._+-]{0,127}} —— **不含空格、不含 @**。
+   * 而本项目的版本名是 {@code v1.4 20261111@0.2.2-rc.1}（带空格与 @），
+   * 于是**自己发布的更新包会被自己的校验丢掉**：App 内「检查更新」永远说「暂无更新」。
+   * 2026-11-12 实测：{@code updates.json} 登记的正是这个串，用上游正则判定为 REJECT。
+   *
+   * <p>判据分两支：
+   * <ul>
+   *   <li>带构建日期形态（{@code v1.4 20261111@0.2.2-rc.1}）—— 本项目实际用的形态，
+   *       允许「前缀 + 版本 + 空格 + 8 位日期 @ 打包版本」
+   *   <li>简单形态（{@code v1.2.3}）—— 兼容上游与历史包
+   * </ul>
+   *
+   * <p>两支都**不允许**换行、路径分隔符、控制字符与双向文本覆盖符 —— 版本名会进
+   * 文件名、日志与界面，放行这些等于开一条注入通道。
+   */
+  private static boolean versionNameValid(String version) {
+    if (version == null || version.isEmpty() || version.length() > 160) return false;
+    // 先做一遍字符白名单：拦住控制字符、换行、路径分隔符、Unicode 双向覆盖符。
+    for (int i = 0; i < version.length(); i++) {
+      char c = version.charAt(i);
+      boolean ok =
+          (c >= 'A' && c <= 'Z')
+              || (c >= 'a' && c <= 'z')
+              || (c >= '0' && c <= '9')
+              || c == '.'
+              || c == '_'
+              || c == '+'
+              || c == '-'
+              || c == '@'
+              || c == ' ';
+      if (!ok) return false;
+    }
+    // 不允许「以点或连字符开头」（会变隐藏文件 / 非法文件名），也不允许连续两点。
+    if (version.startsWith(".") || version.startsWith("-")) return false;
+    if (version.contains("..")) return false;
+    // 不允许首尾空白。
+    if (!version.equals(version.trim())) return false;
+
+    // 形态一：{版本} + 空格 + 8 位构建日期 + @ + 打包版本
+    if (version.matches(
+        "(?:(?:DSHA )?(?:v|rc)[0-9]+(?:\\.[0-9]+)*) [0-9]{8}@[A-Za-z0-9][A-Za-z0-9._+-]{0,63}"))
+      return true;
+    // 形态二：简单版本号，含上游历史格式 `1.2.0-rc1.3`。
+    // 上游与历史包用的是「数字开头 + 可选 -rcN 后缀」，必须继续接受，
+    // 否则 UpdatePolicyTest 里已有的 release 样本会被判非法（实测会红）。
+    return version.matches(
+        "[0-9]+(?:\\.[0-9]+)*(?:-[A-Za-z0-9]+(?:\\.[0-9]+)*)?"
+            + "|(?:DSHA )?(?:v|rc)[0-9]+(?:\\.[0-9]+)*");
   }
 
   public static String defaultChannel(String version) {
