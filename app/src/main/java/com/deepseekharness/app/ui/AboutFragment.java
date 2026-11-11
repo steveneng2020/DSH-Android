@@ -1,5 +1,7 @@
 package com.deepseekharness.app.ui;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.*;
 import android.widget.*;
@@ -33,8 +35,16 @@ public final class AboutFragment extends Fragment {
     mark.setPadding(0, 0, 0, 0);
     mark.setContentDescription(UiText.text("应用图标：点击切换配色"));
     // refreshIcon 由切换器回调，切完立刻刷新本页预览，不必退出重进。
+    // 这里必须用 getContext() + 空判，不能用 requireContext()：弹窗的生命周期不受本 Fragment
+    // 控制，用户切走页面后弹窗仍可能存活，此时回调执行 requireContext() 会抛
+    // IllegalStateException("Fragment … not attached to a context") 直接崩进程。
+    // 2026-11-11 21:09:25 真机崩溃即此路径（AboutFragment.java:37 → IconPickerDialog:168）。
     Runnable refreshIcon =
-        () -> mark.setImageResource(IconSwitcher.PREVIEWS[IconSwitcher.current(requireContext())]);
+        () -> {
+          Context alive = getContext();
+          if (alive == null) return; // 已 detach：预览已不可见，刷新无意义
+          mark.setImageResource(IconSwitcher.PREVIEWS[IconSwitcher.current(alive)]);
+        };
     refreshIcon.run();
     mark.setClickable(true);
     mark.setFocusable(true);

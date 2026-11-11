@@ -20,6 +20,9 @@
     <!-- Wave D（F2）：行尾滑动动作条的读屏「显示操作」自定义动作。 -->
     <item name="swipe_action_open" type="id" />
     <item name="icon_row_check" type="id" />
+    <!-- fork：图标切换的内联提示条（取代原 Toast） -->
+    <item name="icon_applied_icon" type="id" />
+    <item name="icon_applied_text" type="id" />
     <item name="about_upstream_toggle" type="id" />
     <item name="about_upstream_body" type="id" />
     <item name="about_upstream_base" type="id" />
