@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "releases": [
+    {
+      "versionCode": 20050357,
+      "version": "v1.4 20261111@0.2.2-rc.1",
+      "channel": "stable",
+      "notes": "启动修复 + 启动提速 + 推理档位适配：\n\n· 基座升级到上游 0.2.2（build357），内置 DSH 0.2.2-rc.1。\n· 保留本 fork 自有功能：图标切换六套配色、更新日记、上游对比、推理档位适配、插件原生依赖体检。\n· 移除兼容线与 GeckoView，只发布 Standard。\n· 包名 dsh.android.dev，与上游互不通用，覆盖安装需同签名。",
+      "pageUrl": "https://github.com/steveneng2020/DSH-Android/releases/tag/v1.4-20261111",
+      "artifacts": [
+        {
+          "flavor": "standard",
+          "minSdk": 30,
+          "abi": "arm64-v8a",
+          "url": "https://github.com/steveneng2020/DSH-Android/releases/download/v1.4-20261111/DSHA-v1.4-20261111-standard.apk",
+          "sha256": "2a5bf3986791bfc246682d37b71ffb98caa1bb9d29013537448b3464e5474637",
+          "bytes": 317888719
+        }
+      ]
+    }
+  ]
+}
