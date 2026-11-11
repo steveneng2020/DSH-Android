@@ -13,8 +13,8 @@
           "minSdk": 30,
           "abi": "arm64-v8a",
           "url": "https://github.com/steveneng2020/DSH-Android/releases/download/v1.4-20261111/DSHA-v1.4-20261111-standard.apk",
-          "sha256": "7c5e199c78fc7e9c7254b4909bd578c8442090660c2346b387be05d0c7d28b59",
-          "bytes": 317905323
+          "sha256": "4004db1d22ff575fc824d70fe3991b3b11a4fb5227c799683723e6a5cb07e99d",
+          "bytes": 317910075
         }
       ]
     }
