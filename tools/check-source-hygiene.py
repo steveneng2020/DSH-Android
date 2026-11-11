@@ -36,12 +36,12 @@ language_source_pins = {
     "tools/i18n/translations-extra/ko.json": "f487fb8d5ac407b02c19e6e63dd1f8c91e6c39d9a60c2a1bfe63d7f798d4b45d",
     "tools/i18n/translations-extra/pt.json": "fc3be5ceaa2c204599dba713b0f08913f9eedbfe69b1cfddd3b36ada33bc0f0d",
     "tools/i18n/translations-extra/ru.json": "965a35131dc1a783ad01bb54ec15d36258f1855ac9574e72607bd4eb21115cf6",
-    "tools/i18n/translations/ar.json": "e039e44420583b58752708d248b6caa9f8b39fbd8674ae9a7384bfc53d44682c",
-    "tools/i18n/translations/fr.json": "fe8f2b488867121176bb3f6912d729f7c3513f5f460cc771c05c387c1c050640",
-    "tools/i18n/translations/ja.json": "220b712907bafa2a0efc1da64606c49ef2c20fa82966a6ee338c0d40424e9542",
-    "tools/i18n/translations/ko.json": "eee78836669c37dfc23817e436f4a6cc36ae98ec8f6c51ff272bf7a937075d7d",
-    "tools/i18n/translations/pt.json": "a5b65f8d63154b782c5b9a03cdc52558817a3e61bc2606959fa99789e2ecc4c0",
-    "tools/i18n/translations/ru.json": "adb4a171fbe12d3035ed38b5e63d71940660d713214239b11eda2d1029c37495",
+    "tools/i18n/translations/ar.json": "8f6048f62a9edee96a07c14bbbcd3767d4ff56e64c014f8cc129e18b69e9cd60",
+    "tools/i18n/translations/fr.json": "0f027843597ab0b3dcad1123597806b4cc36c316dd25acb6b2c5639366fd5dfe",
+    "tools/i18n/translations/ja.json": "07bf733dd5bd33c98f160db2926d45dd72ef049e840e54558bdcd3cf48de5856",
+    "tools/i18n/translations/ko.json": "4c88599f8d2c334ddf36b68df2cd6a5b0f7085e01f7375997635c02bf80cf004",
+    "tools/i18n/translations/pt.json": "3a27cdfc5659aea4870a18a0f37422fb1ed9870db78e59913cbe99561d2059b1",
+    "tools/i18n/translations/ru.json": "f243770a21179884a4102b91407d5969d6be58271d7f791dd503557128027d87",
 }
 descriptor = json.loads((ROOT / "app/src/main/assets/runtime-descriptor.json").read_text(encoding="utf-8"))
 binary = {".so", ".bin", ".jar", ".aar", ".gz", ".tgz", ".zip", ".png", ".jpg", ".webp", ".pdf", ".keystore"}
