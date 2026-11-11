@@ -121,9 +121,11 @@ public final class UpdateVersionPageTest {
   public void currentRowAndActuallyOpenedNotesUseTheInstalledIdentity() throws IOException {
     try (var controller = Robolectric.buildActivity(UpdateActivity.class).setup()) {
       UpdateActivity activity = controller.get();
+      // 2026-11-12：分隔符统一为 U+2022（•），且经 VersionSeparator 做基线修正。
+      // 这里断言纯文本形态 —— getText().toString() 会丢掉 span，只比对字符本身。
       assertEquals(
           CurrentReleaseNotes.versionLabel(BuildConfig.VERSION_NAME)
-              + " · build"
+              + " \u2022 build"
               + BuildConfig.VERSION_CODE,
           ((TextView) activity.findViewById(R.id.update_changelog_summary)).getText().toString());
       activity.findViewById(R.id.update_changelog).performClick();
@@ -795,7 +797,7 @@ public final class UpdateVersionPageTest {
       assertNotNull(dialog);
       String shown = text(dialog.getWindow().getDecorView());
       assertTrue(shown.contains("预览版 0.2.1-rc.9"));
-      assertTrue(shown.contains("build999 · 4.0 MiB"));
+      assertTrue(shown.contains("build999 \u2022 4.0 MiB"));
       assertTrue(shown.contains("候选版本的完整更新记录"));
       dialog.dismiss();
     }
@@ -859,7 +861,7 @@ public final class UpdateVersionPageTest {
       UpdateActivity activity = controller.get();
       assertEquals(
           CurrentReleaseNotes.versionLabel(BuildConfig.VERSION_NAME)
-              + " · build"
+              + " \u2022 build"
               + BuildConfig.VERSION_CODE,
           ((TextView) activity.findViewById(R.id.update_version_line)).getText().toString());
       View details = activity.findViewById(R.id.update_version_details);

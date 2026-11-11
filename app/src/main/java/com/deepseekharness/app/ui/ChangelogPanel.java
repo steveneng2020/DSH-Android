@@ -12,6 +12,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import com.deepseekharness.app.util.VersionSeparator;
 
 /** 「更新日记」列表：默认只显示最近几条，点按钮展开全部。 */
 public final class ChangelogPanel {
@@ -106,12 +107,12 @@ public final class ChangelogPanel {
   }
 
   /** 版本号与构建号拼一行，构建号缺失时只显示版本号。 */
-  static String versionLine(JSONObject entry) {
+  static CharSequence versionLine(JSONObject entry) {
     String version = entry.optString("version", "");
     String build = entry.optString("build", "");
-    // 分隔符用 U+2022（•）而不是 U+00B7（·）：后者在系统默认中文字体里基线偏低，
-    // 与两侧数字并排时看起来「掉下去」。• 垂直居中，两端对齐更好。
-    return build.isEmpty() ? version : version + " • " + build;
+    // 分隔符固定 U+2022（•），但它的字形天生偏下，必须由 VersionSeparator 做基线修正 ——
+    // 直接拼字符串会看起来「掉下去」（2026-11-12 用户真机指出）。
+    return build.isEmpty() ? version : VersionSeparator.between(version, build);
   }
 
   private static void render(Context context, ViewGroup list, JSONArray entries, int count) {

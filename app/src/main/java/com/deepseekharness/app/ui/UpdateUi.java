@@ -153,8 +153,9 @@ final class UpdateUi {
     return channelName(context, release.channel) + " " + release.version;
   }
 
-  static String releaseMeta(UpdatePolicy.Release release) {
-    return "build" + release.versionCode + " • " + mib(release.bytes);
+  static CharSequence releaseMeta(UpdatePolicy.Release release) {
+    return com.deepseekharness.app.util.VersionSeparator.between(
+        "build" + release.versionCode, mib(release.bytes));
   }
 
   /** 候选卡（手机）与右栏（平板横屏）共用：标题、build·大小、更新记录；没有候选时右栏显示空态。 */
@@ -163,7 +164,7 @@ final class UpdateUi {
         .setVisibility(release != null ? View.VISIBLE : View.GONE);
     Context context = root.getContext();
     String title = release == null ? "" : releaseTitle(context, release);
-    String meta = release == null ? "" : releaseMeta(release);
+    CharSequence meta = release == null ? "" : releaseMeta(release);
     String notes = release == null || release.notes == null ? "" : release.notes.trim();
     text(root, R.id.update_release_title, title);
     text(root, R.id.update_release_meta, meta);

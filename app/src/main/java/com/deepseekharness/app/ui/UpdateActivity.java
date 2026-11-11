@@ -39,11 +39,13 @@ public final class UpdateActivity extends AppCompatActivity {
     paneChosen = saved != null && saved.getBoolean("paneChosen");
     ((TextView) findViewById(R.id.update_current)).setText(BuildConfig.VERSION_NAME);
     ((TextView) findViewById(R.id.update_code)).setText(String.valueOf(BuildConfig.VERSION_CODE));
-    String buildLabel =
-        getString(
-            R.string.ui134_changelog_sub,
+    // 2026-11-12：原先取 R.string.ui134_changelog_sub（"%1$s • build%2$d"），
+    // 那是普通 String，• 无法做基线修正 ⇒ 真机上圆点明显偏低。
+    // 改为在代码里用 VersionSeparator 拼，字符串资源保留但不再用作展示。
+    CharSequence buildLabel =
+        com.deepseekharness.app.util.VersionSeparator.between(
             CurrentReleaseNotes.versionLabel(BuildConfig.VERSION_NAME),
-            BuildConfig.VERSION_CODE);
+            "build" + BuildConfig.VERSION_CODE);
     ((TextView) findViewById(R.id.update_changelog_summary)).setText(buildLabel);
     ((TextView) findViewById(R.id.update_version_line)).setText(buildLabel);
     ((TextView) findViewById(R.id.update_edition))
@@ -327,10 +329,11 @@ public final class UpdateActivity extends AppCompatActivity {
 
   private void showRelease(UpdatePolicy.Release release) {
     String notes = release.notes == null ? "" : release.notes.trim();
-    CardSheet.show(
-        this,
-        UpdateUi.releaseTitle(this, release),
-        UpdateUi.releaseMeta(release) + (notes.isEmpty() ? "" : "\n\n" + notes));
+    // meta 是带基线修正的富文本，不能用 String 拼接（会丢掉 span），改用 Builder 追加。
+    CharSequence body =
+        new android.text.SpannableStringBuilder(UpdateUi.releaseMeta(release))
+            .append(notes.isEmpty() ? "" : "\n\n" + notes);
+    CardSheet.show(this, UpdateUi.releaseTitle(this, release), body);
   }
 
   private void download() {

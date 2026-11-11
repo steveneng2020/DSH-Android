@@ -215,10 +215,14 @@ public class SettingsFragment extends Fragment {
     TextView ver = v.findViewById(R.id.settings_ver);
     // 页脚技术说明（B3）：版本留在摘要上，包名与系统版本收进折叠区（不创建隐藏子视图）。
     // fork：同时显示 build 号（versionCode），与更新日记里的 buildN 对得上。
+    // 三段用同一套分隔符，全部经 VersionSeparator 做基线修正，避免只有中间那个居中、
+    // 旁边两个仍然偏低（初版就是只改了一处，视觉上更乱）。
     ver.setText(
-        com.deepseekharness.app.util.UiText.format(
-            "技术说明 • DSHA %s • build%s",
-            version, com.deepseekharness.app.BuildConfig.VERSION_CODE));
+        com.deepseekharness.app.util.VersionSeparator.between(
+            com.deepseekharness.app.util.VersionSeparator.between(
+                com.deepseekharness.app.util.UiText.text("技术说明"),
+                com.deepseekharness.app.util.UiText.text("DSHA " + version)),
+            "build" + com.deepseekharness.app.BuildConfig.VERSION_CODE));
     TechNote.Model tech = new TechNote.Model();
     tech.key = "settings-tech";
     tech.detail =

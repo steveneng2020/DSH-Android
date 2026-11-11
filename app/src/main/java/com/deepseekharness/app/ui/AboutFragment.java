@@ -57,14 +57,13 @@ public final class AboutFragment extends Fragment {
     brand.setGravity(Gravity.CENTER);
     brand.setPadding(0, ui.dp(16), 0, ui.dp(10));
     ui.content.addView(brand);
-    TextView version =
-        ui.text(
-            "DeepSeek Harness for Android\n"
-                + BuildConfig.VERSION_NAME
-                + " • build"
-                + BuildConfig.VERSION_CODE,
-            12,
-            R.color.text_secondary);
+    // 版本行用 VersionSeparator 拼：• 字形天生偏下，必须做基线修正才与数字同中线。
+    TextView version = ui.text("", 12, R.color.text_secondary);
+    version.setText(
+        com.deepseekharness.app.util.VersionSeparator.withPrefix(
+            "DeepSeek Harness for Android",
+            BuildConfig.VERSION_NAME,
+            "build" + BuildConfig.VERSION_CODE));
     version.setGravity(Gravity.CENTER);
     version.setPadding(0, 0, 0, ui.dp(24));
     ui.content.addView(version);

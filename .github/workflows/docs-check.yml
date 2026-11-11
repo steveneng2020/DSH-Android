@@ -112,6 +112,19 @@ jobs:
           persist-credentials: false
       - name: Runtime input contract
         run: python3 tools/check-runtime-input-contract.py
+  version-separator:
+    name: Version separator consistency
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # 2026-11-12 用户真机指出更新页版本行的圆点偏低。根因不只是字符选错，
+      # 而是全仓 7 处各自硬编码 " • "，没有统一的垂直居中入口。
+      # 这条门禁强制所有版本号分隔走 util/VersionSeparator（内部做 baselineShift）。
+      - name: Version separator consistency
+        run: python3 tools/check-version-separator.py
   runtime-fixture:
     name: Host-test runtime fixture probe
     runs-on: ubuntu-24.04

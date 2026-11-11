@@ -239,8 +239,19 @@ final class CardSheet {
   }
 
   static void show(Context context, String title, String body) {
+    show(context, title, (CharSequence) body);
+  }
+
+  /**
+   * CharSequence 重载：正文可能带样式（版本号里的 • 需要基线修正）。
+   *
+   * <p>为什么不在这里 {@code body.toString()}：toString 会把 span 全部丢掉，
+   * 圆点又回到偏低的位置 —— 那是静默退化，编译期看不出来，只有真机能发现。
+   */
+  static void show(Context context, String title, CharSequence body) {
     CardPage page = new CardPage(context, title, "", true);
-    TextView text = page.text(body, 13, R.color.text_secondary);
+    TextView text = page.text("", 13, R.color.text_secondary);
+    text.setText(body);
     text.setPadding(0, page.dp(14), 0, 0);
     text.setTextIsSelectable(true);
     text.setLineSpacing(page.dp(5), 1);
