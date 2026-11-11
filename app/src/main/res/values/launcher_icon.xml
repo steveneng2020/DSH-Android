@@ -1,1 +1,17 @@
-<resources><color name="dsha_launcher_background">#A7D1FF</color></resources>
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="dsha_launcher_background">#A7D1FF</color>
+    <!--
+      fork 六套图标（biyu 碧玉 / default 朱砂 / moyu 墨玉 / tianqing 天青 /
+      zheshi 赭石 / zishou 紫绶）的 adaptive-icon 背景色。
+      mipmap-anydpi-v26/ic_launcher_*.xml 通过 @color/dsha_launcher_background_*
+      引用这些名字，缺失时 aapt2 直接报 resource not found，Release 资源链接必失败。
+      上游只有默认的 dsha_launcher_background，保留不动。
+    -->
+    <color name="dsha_launcher_background_biyu">#0E3A1C</color>
+    <color name="dsha_launcher_background_default">#5C2E0A</color>
+    <color name="dsha_launcher_background_moyu">#1A1A1A</color>
+    <color name="dsha_launcher_background_tianqing">#14286B</color>
+    <color name="dsha_launcher_background_zheshi">#4E0C0C</color>
+    <color name="dsha_launcher_background_zishou">#3A1259</color>
+</resources>

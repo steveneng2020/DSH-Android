@@ -960,6 +960,14 @@ public class WebProcessManager {
       if (!(name.startsWith("libproot")
           || name.startsWith("libproroot")
           || name.startsWith("libdsha-proroot"))) continue;
+      // 本应用自己写下的受管启动器（容器 supervisor）在命令行里带着
+      // `[ ! -e /root/.dsha-stopped ] || exit 0;`，它自己会读哨兵退出；
+      // 把它当“未识别启动器”会让刚停下的 supervisor 永久锁住维护，
+      // 表现为「旧 Web 未能在维护前确认停止」，且点「重试」永远无效
+      // （重试读到的仍是同一个未退出的 supervisor）。
+      // 这里只放行这一种可自证的形态（WebProcSel.managedWebShell 的完整启动契约），
+      // 其余未识别的 libproot* 一律保留屏障。
+      if (WebProcSel.managedWebLauncher(value.command)) continue;
       // 此处只证明“没有”，不授予signal权限。旧记录缺少可信标记时，
       // 同UID的任何此类启动器都保留屏障；不能把未识别的终端或旧argv当作已经退出。
       return false;

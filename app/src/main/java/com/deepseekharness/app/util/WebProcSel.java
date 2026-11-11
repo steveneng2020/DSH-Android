@@ -132,6 +132,27 @@ public final class WebProcSel {
             || command.contains(DshEntrypoint.exec() + " --profile 'dsha-recovery-"));
   }
 
+  /**
+   * 这条 cmdline 是不是<b>本应用自己写下的受管启动器</b>（容器 supervisor）。
+   *
+   * <p>判据不是"名字像 proot"，而是"参数里带着我们自己的启动契约"：
+   * {@code -c} 后面那段脚本满足 {@link #managedWebShell(String)}，其中显式写着
+   * {@code [ ! -e /root/.dsha-stopped ] || exit 0;} —— 也就是这个启动器<b>自己会读停止哨兵</b>。
+   *
+   * <p>为什么要单独判：停止屏障的"启动器缺位扫描"原先对任何 {@code libproot*} 一律判为
+   * 未退出，于是本应用自己刚拉起、正在退出途中的 supervisor 也会把维护锁住。
+   * 认出来之后它仍然不算"可以发送信号的目标"（{@link #maySignalWeb} 与 {@link #looksLikeWeb}
+   * 的排除规则不变），只是不再被当作<i>未识别的</i>启动器。
+   */
+  public static boolean managedWebLauncher(String cmdline) {
+    if (cmdline == null || cmdline.isEmpty()) return false;
+    String[] argv =
+        cmdline.indexOf('\0') >= 0 ? cmdline.split("\u0000") : cmdline.trim().split("\\s+");
+    for (int i = 0; i + 1 < argv.length; i++)
+      if (argv[i].equals("-c") && managedWebShell(argv[i + 1])) return true;
+    return false;
+  }
+
   private static boolean isProrootManagedWebShell(String[] argv) {
     return argv.length == 9
         && basename(argv[1]).equals("libproroot-linker.so")
