@@ -122,12 +122,47 @@ public final class IconSwitcher {
     apply(context, saved);
   }
 
-  /** 提示已切换为哪套图标。 */
+  /**
+   * 提示已切换为哪套图标。
+   *
+   * <p>用自定义视图而不是 {@code Toast.makeText}：后者在 Android 11+ 会在左侧套上
+   * **应用级**图标（manifest 的 {@code android:icon}，这里固定为 ic_launcher_default）。
+   * 于是切到「赭石」时，提示里配的还是默认黄色图标 —— 与真正生效的配色不一致。
+   * 自定义视图把图标换成 PREVIEWS[index]，与用户刚选的那套对齐。
+   */
   public static void toastApplied(Context context, int index) {
     String label = context.getString(LABELS[index]);
-    Toast.makeText(
-            context, context.getString(R.string.icon_style_applied, label), Toast.LENGTH_SHORT)
-        .show();
+    String text = context.getString(R.string.icon_style_applied, label);
+    Toast toast;
+    try {
+      android.widget.LinearLayout row = new android.widget.LinearLayout(context);
+      row.setOrientation(android.widget.LinearLayout.HORIZONTAL);
+      row.setGravity(android.view.Gravity.CENTER_VERTICAL);
+      int pad = Math.round(12 * context.getResources().getDisplayMetrics().density);
+      row.setPadding(pad, pad, pad, pad);
+
+      android.widget.ImageView icon = new android.widget.ImageView(context);
+      icon.setImageResource(PREVIEWS[index]);
+      int size = Math.round(28 * context.getResources().getDisplayMetrics().density);
+      row.addView(icon, new android.widget.LinearLayout.LayoutParams(size, size));
+
+      android.widget.TextView labelView = new android.widget.TextView(context);
+      labelView.setText(text);
+      labelView.setTextSize(14f);
+      int gap = Math.round(10 * context.getResources().getDisplayMetrics().density);
+      android.widget.LinearLayout.LayoutParams lp =
+          new android.widget.LinearLayout.LayoutParams(-2, -2);
+      lp.leftMargin = gap;
+      row.addView(labelView, lp);
+
+      toast = new Toast(context);
+      toast.setDuration(Toast.LENGTH_SHORT);
+      toast.setView(row);
+    } catch (RuntimeException customUnavailable) {
+      // 自定义视图在任何 ROM 上都不该是致命路径：失败就退回纯文字。
+      toast = Toast.makeText(context, text, Toast.LENGTH_SHORT);
+    }
+    toast.show();
   }
 
   private static SharedPreferences prefs(Context context) {

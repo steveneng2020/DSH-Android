@@ -648,6 +648,37 @@ def gate_fork_topology():
         print('    T20: alias=%d, MainActivity-有LAUNCHER=%s'
               % (n_alias, _main_has_launcher))
 
+    # ⑥c T20⑥：包级 icon 与 alias 级 icon 不同步的检查（2026-11-11 新增）
+    #
+    # 场景：<application android:icon> 是包级、固定默认；六套配色是 <activity-alias android:icon>。
+    # 切 alias 不改包级 icon，于是凡系统按包级取图的地方（Toast / 通知 / 任务快照）永远显示默认。
+    # 判据：与配色相关的 Toast 不得用 Toast.makeText（它会自动套包级 icon）。
+    if os.path.exists(man):
+        pkg_icon = ''
+        for line in mt.splitlines():
+            if 'android:icon=' in line and 'activity-alias' not in line:
+                _m2 = re.search(r'android:icon="([^"]+)"', line)
+                if _m2:
+                    pkg_icon = _m2.group(1)
+                    break
+        sw = os.path.join(SRC, 'app/src/main/java/com/deepseekharness/app/ui/IconSwitcher.java')
+        if os.path.exists(sw):
+            st = open(sw, encoding='utf-8').read()
+            # toastApplied 里若仍出现 Toast.makeText 作为主路径（不在 except 兜底里），则报
+            _ti = st.find('toastApplied')
+            if _ti >= 0:
+                _seg = st[_ti:_ti + 2500]
+                # 允许 except 兜底里出现，主路径不应出现
+                _main = _seg
+                _exc = _main.find('catch (RuntimeException customUnavailable)')
+                if _exc >= 0:
+                    _main = _main[:_exc]
+                if 'Toast.makeText' in _main:
+                    problems.append(
+                        'T20⑥ toastApplied 主路径仍用 Toast.makeText —— '
+                        'Android 11+ 会自动套包级 icon（%s），切换配色后提示里仍是默认图标' % (pkg_icon or '?'))
+        print('    T20⑥: 包级 icon=%s' % (pkg_icon or '(未取到)'))
+
     # ⑦ 冲突面必须可登记：A 数应远大于 M 数（T19 ⑩）
     ns, rc = sh(["git", "diff", "--name-status", "upstream/v0.2.2", "HEAD"])
     if rc == 0:
