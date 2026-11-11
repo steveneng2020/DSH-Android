@@ -58,14 +58,26 @@ def read_gradle_version():
 
 
 def normalize_version(value):
-    """把日期段里的连字符去掉再比。
+    """把日期段里的连字符去掉，并去掉可选的 `DSHA ` 前缀，再比。
 
-    versionName 是 `DSHA v1.4 20261031@0.2.1-rc.2`（紧凑日期），而
-    changelog_recent.json 的展示名是 `DSHA v1.4 2026-10-31@0.2.1-rc.2`
-    （带连字符）—— 两者是同一个版本，只是展示写法不同（v1.3 起一直如此）。
-    把「写法差异」判成错会假红，所以只归一化日期段，其余部分必须逐字相等。
+    versionName 是 `DSHA v1.4 20261031@0.2.1-rc.2`？不 —— 本 fork 的
+    `app/build.gradle` 里 versionName **不带** `DSHA ` 前缀（带了会让
+    `tools/generate-changelog.py` 拼出 `DSHA DSHA …` 的标题）。
+    而 `changelog_recent.json` 的展示名**必须**带前缀：
+    `tools/check-changelog-sync.py` 的 `key_of()` 用 `split()[1]` 取版本键，
+    少了前缀会整串当键，CHANGELOG.md 立刻报「没有 ## 小节」。
+
+    两个上游脚本对同一字段的期望相反（2026-11-11 实测：
+    `check-release-notes-coverage.py` FAIL、`check-changelog-sync.py` PASS）。
+    前缀只是展示写法，不是版本内容，所以在归一化里一并剥掉，
+    让两边都能通过，而不是逼着一个脚本去改另一个脚本依赖的字段格式。
+
+    日期段去连字符同理（v1.3 起 `changelog_recent` 用 `2026-10-27` 写法）。
     """
-    return re.sub(r'(\d{4})-(\d{2})-(\d{2})', r'\1\2\3', str(value or ''))
+    text = str(value or '').strip()
+    if text.startswith('DSHA '):
+        text = text[len('DSHA '):]
+    return re.sub(r'(\d{4})-(\d{2})-(\d{2})', r'\1\2\3', text)
 
 
 def short_version(version_name):

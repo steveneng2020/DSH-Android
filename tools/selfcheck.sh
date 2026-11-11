@@ -103,14 +103,36 @@ if grep -q 'getCanonicalFile' "$J/util/WebSessionStorage.java" 2>/dev/null; then
 else
   check_feature "R2 会话目录 getCanonicalFile" 'getCanonicalFile' "$J/runtime/StoredWebSession.java"
 fi
-# 会话恢复诊断子码：UNKNOWN 按成因可区分。
-# 2026-11-11 修：原模式 'record Outcome|enum Code' 是**死判据**。
-#   v0.2.2 上游自带的 WebSessionRecovery 本来就有
-#   `record Outcome(Result result, String reason, int attempts, String stage)`，
-#   于是该模式在任何 v0.2.2 基座上恒命中 1 次 ⇒ 永远绿，抓不到子码缺失。
-#   实测：HEAD 命中的是上游那条 record，fork 的 `enum Code` 一个字都没有。
-#   子码的唯一特征就是 `enum Code`，只认它。
-check_feature "会话恢复子码 enum Code" 'enum Code' "$J/core/WebSessionRecovery.java"
+# 会话恢复诊断能力：UNKNOWN 必须能按成因区分。
+# 2026-11-11 修（第二次改这一条）：
+#   原判据只认 `enum Code`（fork 在 build190 上的实现）。核到 v0.2.2 后发现
+#   **上游已经自带等价且更强的机制** ——
+#   `record Outcome(Result result, String reason, int attempts, String stage)`
+#   用 reason+stage 两个稳定码描述成因，而 fork 的 13 个 Code 与它一一对应：
+#     UNKNOWN_READ→READ/RECORD_UNAVAILABLE  NONE→READ/NO_RECORD
+#     STALE_SUPERSEDED→COMPATIBILITY/SUPERSEDED  UNKNOWN_NOT_COMPATIBLE→COMPATIBILITY/INCOMPATIBLE
+#     UNKNOWN_VERIFY→KERNEL_VERIFY/IDENTITY_UNKNOWN  UNKNOWN_AUTH→AUTHENTICATE/AUTH_UNAVAILABLE
+#     UNKNOWN_VERIFY_AFTER_AUTH→KERNEL_REVERIFY/IDENTITY_UNKNOWN  RESTORED→ADOPT/RESTORED
+#     STALE_ADOPT_DECLINED→ADOPT/STALE  STALE_GENERATION_CHANGED→STALE（stage 记 after-verify/after-auth）
+#     UNKNOWN_EXCEPTION→保留原 reason
+#   上游还多了 EXITED 分支与 4 参数构造的重载。此时再补一套 enum Code 就是
+#   **两套并行诊断**，日志会出现"同一个成因两种写法"，比缺子码更难查。
+#   所以判据改为「诊断能力存在」而不是「某种具体实现存在」：
+#   Outcome 必须同时携带 result、reason、stage 三项，且 reason 至少有 6 种取值
+#   （6 是 fork 当年压成同一个 UNKNOWN 的成因数）。
+WSC="$J/core/WebSessionRecovery.java"
+if grep -q 'record Outcome(Result result, String reason, int attempts, String stage)' "$WSC" 2>/dev/null; then
+  NREASON=$(grep -oE '"[A-Z][A-Z_]{3,}"' "$WSC" 2>/dev/null | sort -u | wc -l)
+  if [ "$NREASON" -ge 6 ]; then
+    ok "会话恢复诊断：Outcome 带 reason+stage，$NREASON 种稳定码可区分成因（上游 v0.2.2 结构）"
+  else
+    bad "会话恢复诊断码不足：只有 $NREASON 种，UNKNOWN 的多种成因会被压成同一字符串"
+  fi
+elif grep -q 'enum Code' "$WSC" 2>/dev/null; then
+  ok "会话恢复诊断：enum Code 子码结构（fork 旧结构）"
+else
+  bad "会话恢复诊断丢失：既无 reason/stage 的 Outcome，也无 enum Code —— UNKNOWN 无法区分成因"
+fi
 # 停止屏障认得自家受管启动器（否则维护锁被自己的 supervisor 锁死）。
 check_feature "停止屏障识别受管启动器" 'managedWebShell|isManagedLauncher' "$J/util/WebProcSel.java"
 # 安装包换代判据：能进 STALE 而不是永久卡住。

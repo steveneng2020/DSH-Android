@@ -147,16 +147,21 @@ def g04():
     也没提交，等于不存在，v1.1 的更新记录漂了一整个版本。"""
     # 2026-11-11 教训：第一版只查了 CI 与 verify-stability，漏掉 app/build.gradle，
     # 于是把两个真正由构建期调用的门禁误报成「从未执行」。
+    #
+    # 2026-11-11 第二次修：第二版硬编码 4 个 workflow 文件名，又漏了
+    # `docs-check.yml` 与 `_node-contracts.yml` —— 实际 `check-document-links.py`、
+    # `check-ui-i18n.py`、`check-source-hygiene.py` 三个都在里面被调用，
+    # 门禁却报「从未调用」。**判据必须扫全部 workflow，不能维护白名单**，
+    # 白名单每加一个 workflow 就要改一次代码，必然再漏。
     callers = [
         ROOT / 'tools/verify-stability.py',
-        ROOT / '.github/workflows/ci-fast.yml',
-        ROOT / '.github/workflows/ci-package.yml',
-        ROOT / '.github/workflows/release.yml',
         ROOT / 'build.sh',
         ROOT / 'app/build.gradle',
         ROOT / 'build.gradle',
     ]
-    haystack = '\n'.join(read(p) for p in callers)
+    callers += sorted((ROOT / '.github/workflows').glob('*.yml'))
+    callers += sorted((ROOT / '.github/workflows').glob('*.yaml'))
+    haystack = '\n'.join(read(p) for p in callers if p.is_file())
     problems = []
     for script in sorted((ROOT / 'tools').glob('check-*.py')):
         name = script.name
@@ -314,9 +319,17 @@ def g10():
 
     recent = json.loads(read(ROOT / 'app/src/main/res/raw/changelog_recent.json') or '{}')
     entries = recent.get('entries') or []
-    if entries and entries[0].get('version') != version:
-        problems.append('CHANGELOG_VERSION_MISMATCH: 首条 `%s` vs build.gradle `%s`'
-                        % (entries[0].get('version'), version))
+    # 2026-11-11 修：判据原来直接比字符串，要求两者逐字相等。
+    # 但 `changelog_recent.json` 的 `version` 字段**必须**带 `DSHA ` 前缀 ——
+    # `tools/check-changelog-sync.py` 的 `key_of()` 靠 `split()[1]` 取版本键，
+    # 少了前缀会整串当成键，CHANGELOG.md 立刻报「没有 ## 小节」。
+    # 所以正确判据是「去掉可选前缀后与 build.gradle 一致」，而不是「逐字相等」。
+    if entries:
+        shown = str(entries[0].get('version') or '')
+        bare = shown[len('DSHA '):] if shown.startswith('DSHA ') else shown
+        if bare != version:
+            problems.append('CHANGELOG_VERSION_MISMATCH: 首条 `%s`（去前缀后 `%s`）vs build.gradle `%s`'
+                            % (shown, bare, version))
 
     # 版本名里的构建日期与今天是否离谱（只警告不拦，构建日期允许是过去某天）
     return problems

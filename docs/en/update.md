@@ -26,7 +26,7 @@ The page has a single main button that is itself the progress bar and never chan
 
 [UpdatePolicy](../../app/src/main/java/com/deepseekharness/app/util/UpdatePolicy.java) also validates flavor, minSdk, `arm64-v8a`, versionCode, allowed HTTPS source, 64-character hexadecimal SHA-256, and size up to 1 GiB. A saved candidate's checked channel is separate from the release's own channel; current preference cannot establish its origin.
 
-F10/F11 revisions sharing code190 are not selected as a newer version even with a later version name: candidates require `versionCode > BuildConfig.VERSION_CODE`. Use [README](../../README.en.md), the [release introduction](release-introduction.md) and the actual Release for public prerelease assets, attachment digests, and manual downloads. Attachment status requires the actual Release and independent external receipts. “No update” does not prove there are no remote prerelease attachments.
+Upstream F10/F11 revisions sharing code190 (the upstream build number) are not selected as a newer version even with a later version name: candidates require `versionCode > BuildConfig.VERSION_CODE`. Use [README](../../README.en.md), the [release introduction](release-introduction.md) and the actual Release for public prerelease assets, attachment digests, and manual downloads. Attachment status requires the actual Release and independent external receipts. “No update” does not prove there are no remote prerelease attachments.
 
 ## Download, verification, and system installation
 

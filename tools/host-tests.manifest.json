@@ -3353,5 +3353,16 @@
       "environment": {},
       "reason": "proroot git SIGSEGV guard: rc=139 and '[proroot] SIGSEGV' stderr fail loudly with empty stdout, one execution and no retry; normal rc=0 and ordinary failures keep their behavior; module API, CLI and process exit are exercised with a simulated git and no device."
     }
-  ]
+  ],
+  "runtimeFixture": {
+    "pointer": "app/build/test-runtimes/current.json",
+    "producer": "tools/prepare-test-runtime.py",
+    "requires": [
+      "raw",
+      "managed",
+      "current_archive",
+      "native_host"
+    ],
+    "reason": "这四类 requires 必须由本地受管运行时夹具提供；缺夹具时相关测试无法执行。runner 用本声明一次性聚合报错，不再靠匹配错误文本。"
+  }
 }
