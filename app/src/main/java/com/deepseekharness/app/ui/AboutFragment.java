@@ -26,7 +26,13 @@ public final class AboutFragment extends Fragment {
     android.widget.FrameLayout emblem = new android.widget.FrameLayout(requireContext());
     android.widget.ImageView mark = new android.widget.ImageView(requireContext());
     // fork：图标随当前配色变化，点击可切换（上游是固定装饰图）。
-    mark.setImageResource(IconSwitcher.PREVIEWS[IconSwitcher.current(requireContext())]);
+    // refreshIcon 由切换器回调，切完立刻刷新本页预览，不必退出重进。
+    Runnable refreshIcon =
+        () -> mark.setImageResource(IconSwitcher.PREVIEWS[IconSwitcher.current(requireContext())]);
+    refreshIcon.run();
+    mark.setClickable(true);
+    mark.setFocusable(true);
+    mark.setOnClickListener(v -> IconPickerDialog.show(requireContext(), refreshIcon).show());
     mark.setBackgroundResource(R.drawable.bg_ui2_mark);
     mark.setPadding(ui.dp(14), ui.dp(14), ui.dp(14), ui.dp(14));
     emblem.addView(

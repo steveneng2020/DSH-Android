@@ -252,6 +252,8 @@ public class SettingsFragment extends Fragment {
     View overlayRow = v.findViewById(R.id.settings_overlay);
     selectable.put(KEY_OVERLAY, overlayRow);
     overlayRow.setOnClickListener(x -> select(KEY_OVERLAY));
+    // 「自动适配推理档位」入口（用户 2026-10-25 拍板：App 内按钮触发，异步，不阻塞 UI）。
+    ReasoningAutofitEntry.install(this, v);
     // F4：三组（环境 / 体验 / 支持）标题吸顶并可折叠；折叠状态在旋转与分屏后保留。
     installGroups(v);
     if (!twoPane) return v;

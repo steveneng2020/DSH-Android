@@ -31,6 +31,17 @@ public final class AboutDialog {
             .inflate(com.deepseekharness.app.R.layout.dialog_about, null);
     ((android.widget.TextView) content.findViewById(com.deepseekharness.app.R.id.about_version))
         .setText(com.deepseekharness.app.util.UiText.format("DSHA v%s", version));
+    android.widget.ImageView icon =
+        content.findViewById(com.deepseekharness.app.R.id.about_app_icon);
+    if (icon != null) {
+      // 图标与桌面启动图标同源：在「关于」页直接点图标开切换器，不必再进设置。
+      Runnable refresh =
+          () -> icon.setImageResource(IconSwitcher.PREVIEWS[IconSwitcher.current(ctx)]);
+      refresh.run();
+      icon.setClickable(true);
+      icon.setOnClickListener(
+          v -> IconPickerDialog.show(ctx, refresh).show());
+    }
     android.widget.TextView repository =
         content.findViewById(com.deepseekharness.app.R.id.about_repository);
     repository.setText(Uri.parse(GITHUB_URL).getPath().substring(1));

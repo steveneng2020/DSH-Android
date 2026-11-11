@@ -559,13 +559,90 @@ public final class PluginRepository extends AndroidViewModel {
             proot -> {
               JSONObject output =
                   result(runManager(proot, "capabilities " + ShellQuote.arg(item.name)));
-              details[0] = capabilityDescription(output.optJSONObject("capabilities"));
+              details[0] =
+                  capabilityDescription(
+                      output.optJSONObject("capabilities"), nativeDepWarnings(proot, item.name));
               return operationMessage(output);
             }),
         () -> shown.accept(details[0]));
   }
 
+  /**
+   * 插件实体目录：内置插件走 BuiltinPlugins.entityDir，第三方插件依次找
+   * node_modules 与 plugin-src。只有含 package.json 的目录才算实体。
+   */
+  private static File pluginEntityDir(ProotBootstrap proot, String name) {
+    File root = proot.getRootfsDir();
+    if (root == null || name == null || name.isEmpty()) return null;
+    if (com.deepseekharness.app.util.BuiltinPlugins.system(name)) {
+      String entity = com.deepseekharness.app.util.BuiltinPlugins.entityDir(name);
+      if (!entity.isEmpty()) {
+        File dir = new File(root, entity.substring(1));
+        if (new File(dir, "package.json").isFile()) return dir;
+      }
+      return null;
+    }
+    File installed = new File(root, "root/.dsh/profiles/web/node_modules/" + name);
+    if (new File(installed, "package.json").isFile()) return installed;
+    File source = new File(root, "root/.dsh/plugin-src/" + name);
+    if (new File(source, "package.json").isFile()) return source;
+    return null;
+  }
+
+  /**
+   * 原生模块预检：列出插件实体目录里 .node 文件的架构问题。
+   *
+   * <p>只提示不阻断安装：拿不到实体目录（未安装/内置定位失败）或预检抛异常都返回空/降级文案，
+   * 绝不让预检失败把「能力检查」这条主链路带崩。
+   */
+  private static List<String> nativeDepWarnings(ProotBootstrap proot, String name) {
+    List<String> warnings = new ArrayList<>();
+    try {
+      File dir = pluginEntityDir(proot, name);
+      if (dir != null)
+        for (com.deepseekharness.app.util.NativeDepPrecheck.Finding finding :
+            com.deepseekharness.app.util.NativeDepPrecheck.attention(
+                com.deepseekharness.app.util.NativeDepPrecheck.inspect(dir)))
+          warnings.add(
+              com.deepseekharness.app.util.UiText.format(nativeDepMessage(finding), finding.path));
+      return warnings;
+    } catch (RuntimeException ignored) {
+      warnings.add(
+          com.deepseekharness.app.util.UiText.choose(
+              "原生模块预检未能完成（不影响其它结论）",
+              "Native module precheck could not complete (other results unaffected)"));
+      return warnings;
+    }
+  }
+
+  /** 单个原生模块问题的中文/英文文案；未知状态按「无法读取」处理。 */
+  private static String nativeDepMessage(
+      com.deepseekharness.app.util.NativeDepPrecheck.Finding finding) {
+    return switch (finding.status) {
+      case NON_AARCH64 ->
+          com.deepseekharness.app.util.UiText.choose(
+              "原生模块 %s 不是 arm64-v8a，运行到该模块时可能加载失败",
+              "Native module %s is not arm64-v8a; loading it may fail at runtime");
+      case NOT_ELF ->
+          com.deepseekharness.app.util.UiText.choose(
+              "原生模块 %s 不是 ELF 文件，可能是占位或脚本",
+              "Native module %s is not an ELF file; it may be a placeholder or script");
+      case TOO_LARGE ->
+          com.deepseekharness.app.util.UiText.choose(
+              "原生模块 %s 超过预检大小上限，未检查架构",
+              "Native module %s exceeds the precheck size limit; architecture was not checked");
+      default ->
+          com.deepseekharness.app.util.UiText.choose(
+              "原生模块 %s 无法读取", "Native module %s could not be read");
+    };
+  }
+
   public static String capabilityDescription(JSONObject report) {
+    return capabilityDescription(report, Collections.emptyList());
+  }
+
+  /** 能力摘要（含原生模块预检提示）。 */
+  public static String capabilityDescription(JSONObject report, List<String> nativeWarnings) {
     var text = new StringBuilder();
     text.append(
         com.deepseekharness.app.util.UiText.choose(
@@ -614,6 +691,13 @@ public final class PluginRepository extends AndroidViewModel {
             .append(finding.optInt("line"))
             .append('\n');
       }
+    if (nativeWarnings != null && !nativeWarnings.isEmpty()) {
+      text.append(
+          com.deepseekharness.app.util.UiText.choose(
+              "\n原生模块（只提示，不阻止安装）：\n",
+              "\nNative modules (advisory only, install is not blocked):\n"));
+      for (String warning : nativeWarnings) text.append("  · ").append(warning).append('\n');
+    }
     JSONArray unknown = report.optJSONArray("unknown");
     if (unknown != null && unknown.length() > 0) {
       text.append(com.deepseekharness.app.util.UiText.choose("未确认范围：\n", "Unconfirmed scope:\n"));
