@@ -7,6 +7,8 @@ Haec aedificatio super upstream DSHA 0.2.2 (upstream build357) reconstructa est,
 - Status «identitas incognita» post APK renovatam vel vetustiorem redditam emendatus: nova regula substitutionem fasciculi pro certo exitu habet et ad paginam institutionis et reparationis ducit.
 - Accommodatio automatica gradus ratiocinandi addita: exempla quae gradum non declarant declarationem accipiunt (DSHA gradus quae exempla aliena sustineant non conicit; sine declaratione gradus non ostenditur). Solum addit, priusquam scribat fasciculum configurationis servat.
 - Icon applicatonis tangi potest ut sex colores mutentur; mutatio statim valet et memoria tenetur. Icon paginae «De» et icon dialogi ex eodem fonte sunt; tangere selectrum aperit, et icon totam aream implet.
+- Nuntius post iconis mutationem nunc intra capsam dialogi inseritur, non iam Toast in imo screeno fluitans: nuntius iconem et textum coloris electi ostendit et post 2.6 secunda se ipse celat. Index sex ordinum scrollicabilis factus est, et nuntio altitudo minima fixa data, ut in screenis angustis non iam in lineam tenuem comprimatur.
+- Culpa post iconis mutationem in pagina "De hoc programmate" emendata est: vocatio reditus contextum paginae recte poscebat, qui, pagina relicta, exceptionem iacit et processum occidit; nunc, contextu absente, renovatio tacite omittitur.
 - In indiciis facultatum pluginae nativa dependentia inspicitur: ABI et caput fasciculi modulorum nativorum leguntur tantum, monetur sed installatio non prohibetur.
 - Tabula diarii renovationum addita: pagina «De» versiones per sectiones ostendit et omnes expandi possunt; dialogus «De DSHA» idem diarium continet.
 - Comparatio cum upstream addita: ostendit num codex ab upstream differat, legitur tantum, nunquam scribitur.
