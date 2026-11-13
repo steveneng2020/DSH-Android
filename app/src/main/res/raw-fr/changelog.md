@@ -1,5 +1,6 @@
-# DSHA v1.5 20261112@0.2.2-rc.1・ build20060357
+# DSHA v1.5 20261113@0.2.2-rc.1・ build20060457
 
+- Corrigé : l'icône de l'application en tête de la page de mise à jour et dans les gestionnaires de fichiers ne suivait pas le jeu de couleurs — elle était figée sur l'ancienne image par défaut.
 - Le séparateur de version est désormais le point médian pleine chasse ・. La puce pleine précédente est basse par construction et ne s'alignait pas avec les chiffres voisins ; changer de caractère est plus fiable que corriger la ligne de base, et aucun contournement ne subsiste.
 - Correction de « rechercher des mises à jour » qui annonçait toujours aucune mise à jour : la validation du nom de version héritait d'un motif amont interdisant l'espace et @, alors que le nom ici est `v1.5 20261112@0.2.2-rc.1` ; notre propre version était écartée par notre propre validation, en silence.
 - La lecture de la liste de mises à jour réessaie : les délais existaient déjà (15 s connexion / 30 s lecture), mais un seul incident réseau exigeait une relance manuelle. Jusqu'à trois tentatives avec attente de 1 s / 2 s, uniquement pour les erreurs réseau passagères ; les erreurs de certificat et de format ne sont pas réessayées.

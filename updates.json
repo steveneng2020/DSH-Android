@@ -2,19 +2,19 @@
   "schemaVersion": 1,
   "releases": [
     {
-      "versionCode": 20060357,
-      "version": "v1.5 20261112@0.2.2-rc.1",
+      "versionCode": 20060457,
+      "version": "v1.5 20261113@0.2.2-rc.1",
       "channel": "stable",
       "notes": "基座重建 + 启动可靠性修复 + fork 功能全量保留：\n\n· 基座重建到上游 0.2.2（build357），以真实上游提交为祖先，后续上游更新可直接 merge。\n· 修复维护流程永久卡在「停止 Web 与终端任务」。\n· 修复升级/降级 APK 后旧实例永久停在「身份未知」而无法启动。\n· 保留 fork 自有功能：图标六套配色可切换、更新日记面板、上游对比、推理档位自动适配、插件原生依赖体检。\n· 包名 dsh.android.dev，自有发布证书，与上游互不通用，覆盖安装需同签名。",
-      "pageUrl": "https://github.com/steveneng2020/DSH-Android/releases/tag/v1.5-20261112",
+      "pageUrl": "https://github.com/steveneng2020/DSH-Android/releases/tag/v1.5-20261113",
       "artifacts": [
         {
           "flavor": "standard",
           "minSdk": 30,
           "abi": "arm64-v8a",
-          "url": "https://github.com/steveneng2020/DSH-Android/releases/download/v1.5-20261112/DSHA-v1.5-20261112-standard.apk",
-          "sha256": "e46828ad1c859b614caa4047325609d309ae405a80233783c641535b2625e452",
-          "bytes": 317907471
+          "url": "https://github.com/steveneng2020/DSH-Android/releases/download/v1.5-20261113/DSHA-v1.5-20261113-standard.apk",
+          "sha256": "352a02f6334cef69ba17528b8167dbbbd0b2f85db1334616e77c4b9b3c5b4a5d",
+          "bytes": 317908795
         }
       ]
     }

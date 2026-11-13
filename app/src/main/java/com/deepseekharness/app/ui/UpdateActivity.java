@@ -61,6 +61,13 @@ public final class UpdateActivity extends AppCompatActivity {
         (g, id) ->
             repository.setChannel(
                 id == R.id.update_preview ? UpdatePolicy.PREVIEW : UpdatePolicy.STABLE));
+    // 2026-11-13 修：顶部品牌图原先由布局写死 @drawable/dsha_brand（10-30 的旧图），
+    // 不随用户在「关于」页选的配色变化，装了新图标仍是旧的动漫人物图。
+    // 改为与桌面图标同源：读 IconSwitcher.current()，取对应的 PREVIEWS 项。
+    android.widget.ImageView heroIcon = findViewById(R.id.update_hero_icon);
+    if (heroIcon != null) {
+      heroIcon.setImageResource(IconSwitcher.PREVIEWS[IconSwitcher.current(this)]);
+    }
     findViewById(R.id.update_back).setOnClickListener(v -> finish());
     ((TextView) findViewById(R.id.update_dsh))
         .setText(com.deepseekharness.app.util.Constants.DSH_VERSION);

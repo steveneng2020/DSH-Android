@@ -7,7 +7,10 @@
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" style="@style/ShellCard" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="@dimen/shell_card_pad">
   <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical" android:orientation="horizontal">
-    <ImageView android:layout_width="40dp" android:layout_height="40dp" android:importantForAccessibility="no" android:scaleType="centerCrop" android:src="@drawable/dsha_brand" />
+    <!-- 2026-11-13 修：原先写死 @drawable/dsha_brand（10-30 的旧图，未随配色切换）。
+       现由 UpdateActivity 按 IconSwitcher.current() 设置，与桌面图标同源。
+       布局里的 src 只作为占位，运行时会立刻被覆盖。 -->
+    <ImageView android:id="@+id/update_hero_icon" android:layout_width="40dp" android:layout_height="40dp" android:importantForAccessibility="no" android:scaleType="centerCrop" android:src="@mipmap/ic_launcher_default" />
     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="12dp" android:layout_weight="1" android:orientation="vertical">
       <TextView style="@style/ShellCardTitle" android:layout_width="match_parent" android:layout_height="wrap_content" android:accessibilityHeading="true" android:text="@string/app_name" />
       <LinearLayout android:id="@+id/update_version_toggle" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="-6dp" android:background="?attr/selectableItemBackground" android:clickable="true" android:focusable="true" android:gravity="center_vertical" android:minHeight="@dimen/touch_min" android:orientation="horizontal" android:paddingStart="6dp" android:paddingEnd="6dp">

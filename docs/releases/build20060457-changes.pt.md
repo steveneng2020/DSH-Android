@@ -1,5 +1,6 @@
-# DSHA v1.5 20261112@0.2.2-rc.1・ build20060357
+# DSHA v1.5 20261113@0.2.2-rc.1・ build20060457
 
+- Corrigido: o ícone do aplicativo no cabeçalho da página de atualização e nos gerenciadores de arquivos não acompanhava o esquema de cores — estava fixo na imagem padrão antiga.
 - O separador de versão agora é o ponto médio de largura total ・. O marcador sólido anterior fica baixo por desenho e nunca alinhava com os dígitos ao lado; trocar o caractere é mais confiável do que corrigir a linha de base, e nenhum contorno permanece.
 - Corrigido o "verificar atualizações" que sempre dizia não haver atualização: a validação do nome de versão herdava um padrão do upstream que rejeita espaço e @, enquanto o nome aqui é `v1.5 20261112@0.2.2-rc.1`; a nossa própria versão era descartada pela nossa própria validação, em silêncio.
 - A leitura da lista de atualizações agora tenta novamente: os tempos limite já existiam (15 s conexão / 30 s leitura), mas uma única falha de rede exigia nova tentativa manual. Até três tentativas com espera de 1 s / 2 s, apenas para erros transitórios; erros de certificado e de formato não são repetidos.

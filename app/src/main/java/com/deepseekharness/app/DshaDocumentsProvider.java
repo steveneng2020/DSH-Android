@@ -203,7 +203,12 @@ public class DshaDocumentsProvider extends DocumentsProvider {
                   | DocumentsContract.Root.FLAG_SUPPORTS_SEARCH;
           break;
         case "icon":
-          value = R.mipmap.ic_launcher;
+          // 2026-11-13 修：原先写死 R.mipmap.ic_launcher（旧默认图），
+          // 用户在「关于」页换了配色后，文件管理器里显示的仍是旧图标。
+          // 改为与桌面图标同源。
+          value =
+              com.deepseekharness.app.ui.IconSwitcher.PREVIEWS[
+                  com.deepseekharness.app.ui.IconSwitcher.current(getContext())];
           break;
         default:
           value = null;

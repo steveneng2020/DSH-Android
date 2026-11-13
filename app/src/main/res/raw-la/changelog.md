@@ -1,5 +1,6 @@
-# DSHA v1.5 20261112@0.2.2-rc.1・ build20060357
+# DSHA v1.5 20261113@0.2.2-rc.1・ build20060457
 
+- Iconum applicationis in capite paginae renovationis et in administris fasciculorum colores selectos non sequi corrigitur: prius imagini pristinae definitae affixum erat.
 - Divisor versionis nunc est punctum medium plenae latitudinis ・. Prius punctum solidum in ipso charactere deorsum sedet, unde cum numeris vicinis non congruit; characterem mutare certius est quam lineam basim corrigere, neque ullum artificium reliquum est.
 - Emendatum est "novas quaerere" semper "nullae novae" nuntiare: probatio nominis versionis normam superiorem secuta est quae spatium et @ non admittit, cum hoc propositum nomen `v1.5 20261112@0.2.2-rc.1` gerat; ita editio nostra a nostra ipsa probatione tacite reiecta est.
 - Lectio indicis novarum nunc repetitur: morae iam erant (15 s conexionis / 30 s lectionis), sed unus casus retis repetitionem manualem postulabat. Usque ad tres conatus cum mora 1 s / 2 s, solum pro erroribus retis brevibus; errores testimonii et formae non repetuntur.
