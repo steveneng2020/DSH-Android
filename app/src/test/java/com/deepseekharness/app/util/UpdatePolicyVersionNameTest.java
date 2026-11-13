@@ -32,7 +32,11 @@ public class UpdatePolicyVersionNameTest {
             "standard",
             30,
             "arm64-v8a",
-            "https://raw.githubusercontent.com/steveneng2020/DSH-Android/main/apk/x.apk",
+            // 2026-11-13 修：这里原本是 raw.githubusercontent.com/.../main/apk/x.apk，
+            // 但 UpdateLocations.artifact() 只认本 fork 的 releases/download/ 路径，
+            // 于是 valid() 恒为 false，本测试的三个 accepts* 用例失败 ——
+            // **是夹具 URL 不合规，不是版本名校验有问题**（版本名逻辑用 java 单独复现已全对）。
+            "https://github.com/steveneng2020/DSH-Android/releases/download/v1.4-20261111/x.apk",
             "a".repeat(64),
             100,
             "说明",
