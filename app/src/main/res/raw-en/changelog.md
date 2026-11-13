@@ -1,18 +1,11 @@
-# DSHA v1.4 20261111@0.2.2-rc.1・ build20050357
+# DSHA v1.5 20261112@0.2.2-rc.1・ build20060357
 
-This build is rebuilt on upstream DSHA 0.2.2 (upstream build357), bundling DSH 0.2.2-rc.1 on Ubuntu base 10.
+This release fixes the separator rendering and the update check on top of v1.4, and ports four robustness features missing upstream.
 
-- Fixed the blank startup page after upgrades, the unresponsive "Start DSHA" button, and occasional stalls on the recovery page.
-- Fixed maintenance getting permanently stuck on "stop Web and terminal tasks", where retrying did nothing either: the stop barrier could not recognise the container supervisor this app launches itself, treated it as an unidentified process and never released the barrier.
-- Fixed old instances staying permanently at "identity unknown" and refusing to start after an APK upgrade or downgrade: a superseded-build check now recognises a package swap as a definite expiry and routes into the install-and-repair page instead of hanging.
-- Added automatic reasoning-effort adaptation: models that declare no reasoning effort get the declaration filled in (DSHA does not guess which levels a third-party model supports; undeclared means no reasoning level is shown). Additive only, with an automatic config backup before writing.
-- The launcher icon is tappable to switch between six palettes; the change takes effect immediately and is remembered. The About page and About dialog share the same icon source, so tapping either opens the switcher, and the icon now fills its canvas.
-- The post-switch notice now appears as an inline bar inside the icon dialog instead of a Toast floating at the bottom of the screen: the bar shows the chosen palette's icon and text and hides itself after 2.6 s. The six-row list became scrollable and the bar keeps a fixed minimum height, so it is no longer squeezed to a sliver on short screens.
-- Fixed a crash after switching the icon from the About page: the switch callback used to require the page context, which throws once the page is gone and takes the process down; it now silently skips the refresh when no context is available.
-- Plugin capability hints gained a native dependency precheck: a read-only inspection of the ABI and file header of bundled native modules, warned about but never blocking installation.
-- Added the changelog panel: the About page shows releases in blocks and can expand all of them; the About DSHA dialog embeds the same changelog inline.
-- Added upstream comparison: shows whether the code differs from upstream, read-only and never written back.
-- The About page community entry now uses the contact email steveneng@163.com; the update page's "view releases in browser" and its stable and preview links point at this repository instead of the upstream release page.
-- Release identity stays independent: package dsh.android.dev with its own release certificate, not interchangeable with upstream dsh.android.client; in-place upgrade requires the same signature.
-- Single variant: the compatibility line and GeckoView are removed; only Standard ships (Android 11+, arm64-v8a, system WebView).
-- Merged upstream DSHA 0.2.2 (upstream build357), bundling DSH 0.2.2-rc.1 on Ubuntu base 10: mobile UI v5, a standalone device-capability authorisation page, the maintenance-time plugin registration deadlock fix, and every upstream commit since the previous merge (upstream v0.2.1-rc.2, upstream build190). The branch was rebuilt on a real upstream commit (5e2dca92, 2026-11-11), so future upstream updates merge directly instead of being force-fitted.
+- The version separator is now the full-width middle dot ・. The previous solid bullet sits low by design, so it never lined up with the digits beside it; changing the character is more reliable than patching the baseline, and no glyph workaround remains.
+- Fixed "check for updates" always reporting no update: the version-name check inherited an upstream pattern that rejects spaces and @, while this project's name is `v1.5 20261112@0.2.2-rc.1` — so our own release was discarded by our own validation, silently.
+- Reading the update feed now retries: timeouts already existed (15 s connect / 30 s read), but a single network hiccup forced a manual retry. Up to three attempts with 1 s / 2 s backoff, only for transient network errors; certificate and manifest errors are not retried.
+- Safe mode now blocks installing and enabling plugins: previously it only toggled a banner while install and enable still worked, which made the mode meaningless. Disabling and uninstalling stay allowed.
+- Fixed the Web entry button sticking at "opening…" after the Web generation changed: a changed generation means the one being awaited is gone. It now resets to retryable with "Web restarted, open it again" instead of being treated as a failure.
+- Virtual screen now debounces consecutive frame rejections: occasional rejections are normal, but three in a row means the session's frame sequence no longer matches the picture. The stale session is dropped and rebuilt instead of leaving taps unresponsive.
+- Fixed the release-notes dialog showing "this installation does not include release notes for the current build": after the title generator switched separators, the reading side still matched the old format and rejected the notes.
