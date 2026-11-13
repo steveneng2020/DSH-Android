@@ -182,6 +182,18 @@ def main():
         print('\n拒绝输出：产物不是合格的正式包。')
         return 1
 
+    # 2026-11-13 事故：Gradle 增量构建复用了旧中间产物，APK 内 changelog_recent
+    # 仍是上一版的 build 号，用户装包后才看到。门禁读磁盘源文件，查不出这个。
+    # 交付前必须核对 APK 内实物内容。
+    checker = ROOT / 'tools/check-apk-changelog.py'
+    if checker.is_file():
+        result = subprocess.run([sys.executable, '-B', str(checker), str(APK)],
+                                capture_output=True, text=True)
+        if result.returncode != 0:
+            print(result.stdout.rstrip())
+            print('\n拒绝输出：APK 内的更新日记与源文件不一致。')
+            return 1
+
     digest = hashlib.sha256(APK.read_bytes()).hexdigest()
     size = APK.stat().st_size
 

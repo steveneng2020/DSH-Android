@@ -1,4 +1,4 @@
-# DSHA v1.5 20261113@0.2.2-rc.1・ build20060457
+# DSHA v1.5 20261113@0.2.2-rc.1・ build20070357
 
 - Corrigé : l'icône de l'application en tête de la page de mise à jour et dans les gestionnaires de fichiers ne suivait pas le jeu de couleurs — elle était figée sur l'ancienne image par défaut.
 - Le séparateur de version est désormais le point médian pleine chasse ・. La puce pleine précédente est basse par construction et ne s'alignait pas avec les chiffres voisins ; changer de caractère est plus fiable que corriger la ligne de base, et aucun contournement ne subsiste.

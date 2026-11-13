@@ -1,4 +1,4 @@
-# DSHA v1.5 20261113@0.2.2-rc.1・ build20060457
+# DSHA v1.5 20261113@0.2.2-rc.1・ build20070357
 
 - Iconum applicationis in capite paginae renovationis et in administris fasciculorum colores selectos non sequi corrigitur: prius imagini pristinae definitae affixum erat.
 - Divisor versionis nunc est punctum medium plenae latitudinis ・. Prius punctum solidum in ipso charactere deorsum sedet, unde cum numeris vicinis non congruit; characterem mutare certius est quam lineam basim corrigere, neque ullum artificium reliquum est.

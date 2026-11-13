@@ -1,4 +1,4 @@
-# DSHA v1.5 20261113@0.2.2-rc.1・ build20060457
+# DSHA v1.5 20261113@0.2.2-rc.1・ build20070357
 
 - Corrigido: o ícone do aplicativo no cabeçalho da página de atualização e nos gerenciadores de arquivos não acompanhava o esquema de cores — estava fixo na imagem padrão antiga.
 - O separador de versão agora é o ponto médio de largura total ・. O marcador sólido anterior fica baixo por desenho e nunca alinhava com os dígitos ao lado; trocar o caractere é mais confiável do que corrigir a linha de base, e nenhum contorno permanece.

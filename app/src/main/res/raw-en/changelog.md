@@ -1,4 +1,4 @@
-# DSHA v1.5 20261113@0.2.2-rc.1・ build20060457
+# DSHA v1.5 20261113@0.2.2-rc.1・ build20070357
 
 This release fixes the separator rendering and the update check on top of v1.4, and ports four robustness features missing upstream.
 

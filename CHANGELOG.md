@@ -2,7 +2,7 @@
 
 ## v1.5 · 20261113
 
-> 版本 `v1.5 20261113@0.2.2-rc.1` / versionCode `20060457` / standard flavor。
+> 版本 `v1.5 20261113@0.2.2-rc.1` / versionCode `20070357` / standard flavor。
 
 **分隔符统一 + 更新检查修复**
 
