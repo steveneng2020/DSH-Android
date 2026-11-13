@@ -303,6 +303,11 @@ def main():
         run('apk-assets',[sys.executable,'-B','tools/verify-dsh-upgrade-apk.py',*apks],{'DSHA_TEST_RUNTIME':str(locked_runtime)})
         run('third-party-apk',[sys.executable,'-B','tools/verify-third-party-apk.py',*apks,
                               '--output',report_dir/'third-party-apk.json'])
+        # 2026-11-13: Gradle 增量构建会复用旧 packaged_res，导致 APK 内 changelog_recent
+        # 仍是上一版 build 号；门禁读磁盘源文件查不出。逐个 APK 核对实物内容。
+        for _flavor,_apk in zip(flavors,apks):
+            if _apk.is_file():
+                run('apk-changelog-'+_flavor,[sys.executable,'-B','tools/check-apk-changelog.py',_apk])
         build_tools=args.sdk/'build-tools/36.0.0';report['apks']=[]
         for flavor,apk in zip(flavors,apks):
             minimum=30
