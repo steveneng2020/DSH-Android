@@ -10,7 +10,7 @@
 
 用法：
     cd "/storage/emulated/0/Download/Eta/DSHA开发/DSHA-src"
-    export PATH="/workspace/env/jdk17/bin:$PATH"
+    export PATH="/opt/dsha-env/jdk17/bin:$PATH"
     python3 ../_gate.py
 
 退出码 0 = GATE PASS；非 0 = 有 FAIL。
@@ -77,7 +77,7 @@ def gate_numbers():
         "branch": run("git branch --show-current"),
         "changes": run("git status --short | wc -l"),
         "java": run("find app/src -name '*.java' | wc -l"),
-        "gradle_home": run("du -sm /workspace/env/gradle-home | cut -f1") if DEEP else "skip",
+        "gradle_home": run("du -sm /opt/dsha-env/gradle-home | cut -f1") if DEEP else "skip",
         "deps_count": run("ls deps | wc -l"),
         "docs_md": run("ls -1 %s/docs/*.md 2>/dev/null | wc -l" % WS),
     }
@@ -184,7 +184,7 @@ def gate_consistency():
         ("F-03", r"F-03.*?`(\d+)`", run("git status --short | wc -l")),
         ("F-07", r"F-07.*?`(\d+)`", run("find app/src -name '*.java' | wc -l")),
         ("F-08", r"F-08.*?`(\d+)`", run("find app/src -type f | grep -v /build/ | wc -l")),
-        ("F-09", r"F-09.*?`(\d+)` MB", run("du -sm /workspace/env/gradle-home | cut -f1") if DEEP else None),
+        ("F-09", r"F-09.*?`(\d+)` MB", run("du -sm /opt/dsha-env/gradle-home | cut -f1") if DEEP else None),
         ("F-10", r"F-10.*?`(\d+)` 项", run("ls deps | wc -l")),
         ("F-11", r"F-11.*?`(\d+)`", run("find .git/objects -type f | wc -l")),
         ("F-12", r"F-12.*?`(\d+)`", run("ls -1 %s/docs/*.md 2>/dev/null | wc -l" % WS)),

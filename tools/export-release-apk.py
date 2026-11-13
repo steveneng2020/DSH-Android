@@ -100,7 +100,7 @@ def verify(apk):
         problems.append('ABI_MISMATCH: 期望仅 arm64-v8a')
 
     jar = tools / 'lib/apksigner.jar'
-    java = shutil.which('java') or '/workspace/env/jdk17/bin/java'
+    java = shutil.which('java') or '/opt/dsha-env/jdk17/bin/java'
     if not jar.is_file():
         problems.append('APKSIGNER_MISSING: %s' % jar)
     else:

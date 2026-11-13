@@ -4,7 +4,7 @@
 # 判据：全部 OK，退出码 0。有 FAIL 先修 §六，不要改代码。
 
 cd "/storage/emulated/0/Download/Eta/DSHA开发/DSHA-src" || { echo "FAIL: 源码目录不存在"; exit 2; }
-export PATH="/workspace/env/jdk17/bin:$PATH"
+export PATH="/opt/dsha-env/jdk17/bin:$PATH"
 
 FAILN=0
 ok()   { printf "  OK    %s\n" "$1"; }
@@ -53,10 +53,10 @@ else
 fi
 
 echo "=== 8. 工具链文件存在 ==="
-for p in /workspace/env/jdk17/bin/java /workspace/env/gradle-9.3.1/bin/gradle; do
+for p in /opt/dsha-env/jdk17/bin/java /opt/dsha-env/gradle-9.3.1/bin/gradle; do
   [ -x "$p" ] && ok "$p" || bad "$p 不存在"
 done
-[ -d /workspace/env/gradle-home ] && ok "gradle-home $(du -sm /workspace/env/gradle-home | cut -f1)MB" || bad "gradle-home 不存在"
+[ -d /opt/dsha-env/gradle-home ] && ok "gradle-home $(du -sm /opt/dsha-env/gradle-home | cut -f1)MB" || bad "gradle-home 不存在"
 
 # 时区：本机 Debian 默认 UTC，TZ 为空。直接 `date` 会比北京时间慢 8 小时且可能跨天，
 # 交付包命名与文档时间戳会整批写错（MEMORY §4 第 35 条）。这里只提示，不计入 FAILN 以外的新项。

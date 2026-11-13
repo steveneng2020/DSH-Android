@@ -15,7 +15,7 @@ SELF_DIR=$(cd "$(dirname "$0")" && pwd)
 SRC=$(dirname "$SELF_DIR")
 WS=$(dirname "$SRC")
 cd "$SRC" || { echo "FAIL: 源码目录不存在"; exit 2; }
-export PATH="/workspace/env/jdk17/bin:$PATH"
+export PATH="/opt/dsha-env/jdk17/bin:$PATH"
 
 FAILN=0
 ok()  { printf "  \033[32mOK\033[0m    %s\n" "$1"; }
