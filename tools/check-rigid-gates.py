@@ -261,18 +261,21 @@ def g08():
     还把 refs/recovered/tags/* 变成了 28 个畸形 tag（refs/tags/refs/recovered/tags/*）。"""
     problems = []
     refs = sh(['git', 'for-each-ref', '--format=%(refname)']).split('\n')
+    # 2026-11-13 修：判据原来写死「本仓库无 origin」，但发布流程需要 origin 才能 push，
+    # 一旦加了 origin，正常的 refs/remotes/origin/main 就被误报成历史残留。
+    # 正确判据是「remote 存在则其跟踪引用合法，remote 不存在才是残留」。
+    remotes = set(filter(None, sh(['git', 'remote']).split('\n')))
     for ref in filter(None, refs):
         if ref.startswith('refs/tags/refs/'):
             problems.append('MALFORMED_TAG_REF: %s（tag 名里嵌了 refs/ 路径）' % ref)
         elif ref.startswith('refs/recovered/') or ref.startswith('refs/backup/'):
             problems.append('STALE_LOCAL_REF: %s（filter-repo 残留，会藏住已清理的历史）' % ref)
-        # `refs/remotes/<remote>/*` 要区分两类：
-        #   - `refs/remotes/origin/*`：本仓库已没有 origin，出现即为历史残留
-        #   - `refs/remotes/upstream/*`：正常的上游跟踪引用，合并/对比都要用它
-        # 2026-11-11 教训：第一版一刀切把所有 refs/remotes/ 判为残留，
-        # fetch 上游后立刻误报 —— 门禁范围划错比没有门禁更糟。
-        elif ref.startswith('refs/remotes/origin/'):
-            problems.append('STALE_LOCAL_REF: %s（本仓库无 origin，属历史残留）' % ref)
+        # `refs/remotes/<remote>/*`：remote 存在即正常跟踪引用；remote 已删才是残留。
+        elif ref.startswith('refs/remotes/'):
+            remote = ref[len('refs/remotes/'):].split('/')[0]
+            if remote not in remotes:
+                problems.append('STALE_LOCAL_REF: %s（remote `%s` 已不存在，属历史残留）'
+                                % (ref, remote))
     return problems
 
 
